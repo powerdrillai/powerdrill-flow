@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 
 // Powerdrill API 的基础URL
-const API_BASE_URL = "https://api.powerdrill.ai/v2";
+const API_BASE_URL = "https://ai.data.cloud/api/v2/team";
 
 // API 凭证接口
 export interface PowerdrillCredentials {
