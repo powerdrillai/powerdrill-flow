@@ -1,3 +1,4 @@
+
 import { toast } from "sonner";
 
 // Powerdrill API 的基础URL
@@ -90,6 +91,10 @@ export class PowerdrillAPI {
       "Content-Type": "application/json",
       "X-User-ID": this.credentials.userId,
       "X-API-Key": this.credentials.apiKey,
+      // 添加CORS相关的头部
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, X-User-ID, X-API-Key"
     };
   }
 
@@ -99,6 +104,8 @@ export class PowerdrillAPI {
     }
     
     try {
+      console.log(`发送请求到: ${API_BASE_URL}${endpoint}`);
+      
       const headers = this.getHeaders();
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         ...options,
@@ -106,17 +113,24 @@ export class PowerdrillAPI {
           ...headers,
           ...options.headers,
         },
+        // 添加额外的fetch选项
+        mode: 'cors',
+        credentials: 'omit'
       });
+
+      console.log(`收到响应状态码: ${response.status}`);
 
       if (!response.ok) {
         let errorMessage = `API 请求失败，状态码: ${response.status}`;
         
         try {
           const errorData = await response.json();
+          console.error("API错误数据:", errorData);
           if (errorData.message) {
             errorMessage = errorData.message;
           }
         } catch (e) {
+          console.error("无法解析错误响应JSON:", e);
           // 如果不能解析为 JSON，使用默认错误消息
         }
         
@@ -136,14 +150,17 @@ export class PowerdrillAPI {
         return { success: true };
       }
 
-      return await response.json();
+      const responseData = await response.json();
+      console.log("API返回数据:", responseData);
+      return responseData;
     } catch (error) {
-      console.error("API 请��失败:", error);
+      console.error("API 请求失败:", error);
       
       // 区分网络错误和其他错误
       if (error instanceof Error) {
-        if (error.message.includes('fetch') || error.message.includes('network')) {
-          throw new Error("无法连接到 PowerDrill API，请检查您的网络连接");
+        if (error.message.includes('fetch') || error.message.includes('network') || 
+            error.message.includes('Failed to fetch')) {
+          throw new Error("无法连接到 PowerDrill API，请检查您的网络连接或API地址是否正确");
         }
         throw error;
       }

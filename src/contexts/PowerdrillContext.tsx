@@ -2,7 +2,6 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { PowerdrillAPI, PowerdrillCredentials, Dataset, DataSource, StreamChunk } from '../services/api';
 import { toast } from 'sonner';
 
-// 定义上下文的形状
 interface PowerdrillContextType {
   credentials: PowerdrillCredentials | null;
   api: PowerdrillAPI;
@@ -29,7 +28,6 @@ interface PowerdrillContextType {
   clearCanvas: () => void;
 }
 
-// 聊天消息类型
 export interface Message {
   id: string;
   role: 'user' | 'assistant' | 'system';
@@ -42,7 +40,6 @@ export interface Message {
   datasetId?: string;
 }
 
-// Canvas 内容类型
 export interface CanvasContent {
   message?: string;
   images?: string[];
@@ -52,10 +49,8 @@ export interface CanvasContent {
   }[];
 }
 
-// 创建上下文
 const PowerdrillContext = createContext<PowerdrillContextType | undefined>(undefined);
 
-// 创建 Provider 组件
 export const PowerdrillProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const api = new PowerdrillAPI();
   
@@ -69,7 +64,6 @@ export const PowerdrillProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [canvasContent, setCanvasContent] = useState<CanvasContent | null>(null);
   const [explorationQuestions, setExplorationQuestions] = useState<string[]>([]);
 
-  // 在组件挂载时加载保存的凭证
   useEffect(() => {
     const savedCredentials = api.loadCredentials();
     if (savedCredentials) {
@@ -78,21 +72,30 @@ export const PowerdrillProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   }, []);
 
-  // 设置凭证
   const setCredentials = async (creds: PowerdrillCredentials): Promise<void> => {
     try {
       api.setCredentials(creds);
       
-      // 使用简单的 API 调用测试凭证
       setIsLoading(true);
-      await api.listDatasets();
+      console.log("尝试验证API凭证...");
       
-      setCredentialsState(creds);
-      setIsAuthenticated(true);
-      return Promise.resolve();
+      try {
+        await api.listDatasets();
+        console.log("API凭证验证成功");
+        
+        setCredentialsState(creds);
+        setIsAuthenticated(true);
+        return Promise.resolve();
+      } catch (error) {
+        console.error("API调用失败:", error);
+        
+        api.clearCredentials();
+        setCredentialsState(null);
+        setIsAuthenticated(false);
+        return Promise.reject(error);
+      }
     } catch (error) {
       console.error("凭证验证失败:", error);
-      // 如果验证失败，清除凭证
       api.clearCredentials();
       setCredentialsState(null);
       setIsAuthenticated(false);
@@ -102,7 +105,6 @@ export const PowerdrillProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   };
 
-  // Logout
   const logout = () => {
     api.clearCredentials();
     setCredentialsState(null);
@@ -114,17 +116,14 @@ export const PowerdrillProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     clearCanvas();
   };
 
-  // Reset messages
   const resetMessages = () => {
     setMessages([]);
   };
 
-  // Clear canvas
   const clearCanvas = () => {
     setCanvasContent(null);
   };
 
-  // Load datasets
   const loadDatasets = async () => {
     if (!isAuthenticated) return;
     
@@ -139,7 +138,6 @@ export const PowerdrillProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   };
 
-  // Create a new dataset
   const createDataset = async (name: string): Promise<Dataset> => {
     setIsLoading(true);
     try {
@@ -151,7 +149,6 @@ export const PowerdrillProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   };
 
-  // Load data sources for a dataset
   const loadDataSources = async (datasetId: string) => {
     if (!isAuthenticated) return;
     
@@ -166,7 +163,6 @@ export const PowerdrillProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   };
 
-  // Create a new data source
   const createDataSource = async (file: File): Promise<DataSource> => {
     if (!currentDataset) {
       throw new Error("No dataset selected");
@@ -182,7 +178,6 @@ export const PowerdrillProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   };
 
-  // Delete a dataset
   const deleteDataset = async (datasetId: string) => {
     setIsLoading(true);
     try {
@@ -200,7 +195,6 @@ export const PowerdrillProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   };
 
-  // Delete a data source
   const deleteDataSource = async (dataSourceId: string) => {
     setIsLoading(true);
     try {
@@ -217,13 +211,11 @@ export const PowerdrillProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   };
 
-  // Upload files to create data sources
   const uploadFiles = async (files: File[]) => {
     if (!currentDataset) {
       throw new Error("No dataset selected");
     }
     
-    // Add a message for the file upload
     const uploadMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
@@ -236,7 +228,6 @@ export const PowerdrillProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     
     setMessages(prev => [...prev, uploadMessage]);
     
-    // Create a system message to indicate processing
     const processingMessage: Message = {
       id: Date.now().toString() + '-processing',
       role: 'system',
@@ -250,27 +241,23 @@ export const PowerdrillProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     
     setIsLoading(true);
     try {
-      // Upload each file to create data sources
       for (const file of files) {
         await createDataSource(file);
       }
       
-      // Poll dataset status until ready
       let status = { status: 'processing' };
       while (status.status !== 'ready' && status.status !== 'failed') {
         status = await api.getDatasetStatus(currentDataset.id);
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before polling again
+        await new Promise(resolve => setTimeout(resolve, 2000));
       }
       
       if (status.status === 'failed') {
         throw new Error("Dataset processing failed");
       }
       
-      // Get dataset overview
       const overview = await api.getDatasetOverview(currentDataset.id);
       setExplorationQuestions(overview.exploration_questions);
       
-      // Update the processing message
       setMessages(prev => 
         prev.map(msg => 
           msg.id === processingMessage.id 
@@ -288,7 +275,6 @@ export const PowerdrillProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     } catch (error) {
       console.error("Failed to upload and process files:", error);
       
-      // Update the processing message with the error
       setMessages(prev => 
         prev.map(msg => 
           msg.id === processingMessage.id 
@@ -307,13 +293,11 @@ export const PowerdrillProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   };
 
-  // Ask a question
   const askQuestion = async (question: string) => {
     if (!currentDataset) {
       throw new Error("No dataset selected");
     }
     
-    // Add the user question to messages
     const questionMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
@@ -324,7 +308,6 @@ export const PowerdrillProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     
     setMessages(prev => [...prev, questionMessage]);
     
-    // Add a placeholder for the assistant's response
     const responseId = Date.now().toString() + '-response';
     const responsePlaceholder: Message = {
       id: responseId,
@@ -338,13 +321,10 @@ export const PowerdrillProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setMessages(prev => [...prev, responsePlaceholder]);
     
     try {
-      // Create a job with streaming enabled
       const response = await api.createJob(currentDataset.id, question, true);
       
-      // Reset canvas content
       clearCanvas();
       
-      // Process the streaming response
       let responseContent = '';
       let newCanvasContent: CanvasContent = {
         images: [],
@@ -353,12 +333,10 @@ export const PowerdrillProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       let newQuestions: string[] = [];
       
       await api.processStreamResponse(response, (chunk: StreamChunk) => {
-        // Process different event types
         if (chunk.event === 'MESSAGE') {
           responseContent += chunk.data.message;
           newCanvasContent.message = responseContent;
           
-          // Update the response message
           setMessages(prev => 
             prev.map(msg => 
               msg.id === responseId 
@@ -389,11 +367,9 @@ export const PowerdrillProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           setExplorationQuestions(newQuestions);
         }
         
-        // Update canvas content after processing each chunk
         setCanvasContent({ ...newCanvasContent });
       });
       
-      // After stream is complete, add any follow-up questions
       if (newQuestions.length > 0) {
         const questionsMessage: Message = {
           id: Date.now().toString() + '-questions',
@@ -410,7 +386,6 @@ export const PowerdrillProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     } catch (error) {
       console.error("Failed to get answer:", error);
       
-      // Update the response message with the error
       setMessages(prev => 
         prev.map(msg => 
           msg.id === responseId 
@@ -460,7 +435,6 @@ export const PowerdrillProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   );
 };
 
-// 使用 Powerdrill 上下文的自定义钩子
 export const usePowerdrill = () => {
   const context = useContext(PowerdrillContext);
   if (context === undefined) {

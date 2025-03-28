@@ -6,14 +6,15 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { toast } from "sonner";
 import { usePowerdrill } from "@/contexts/PowerdrillContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Info } from "lucide-react";
 
 const LoginForm = () => {
   const { setCredentials } = usePowerdrill();
-  const [userId, setUserId] = useState('');
+  const [userId, setUserId] = useState('tmm-cm5vy5e6e0ar907s9o39nk9kv'); // 预填充User ID
   const [apiKey, setApiKey] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [apiStatus, setApiStatus] = useState('未连接');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,11 +25,14 @@ const LoginForm = () => {
       toast.error('请输入 User ID 和 API Key');
       return;
     }
-    
+
+    setApiStatus('正在连接...');
     setLoading(true);
     try {
+      console.log('尝试使用以下凭证连接PowerDrill API:', { userId, apiKey: '***' });
       // 设置凭证并尝试测试连接
       await setCredentials({ userId, apiKey });
+      setApiStatus('已连接');
       toast.success('登录成功');
     } catch (error) {
       console.error('登录错误:', error);
@@ -38,9 +42,11 @@ const LoginForm = () => {
       
       // 提供更明确的错误信息
       let displayError = errorMessage;
-      if (errorMessage.includes('fetch')) {
-        displayError = '连接到 PowerDrill API 失败，请检查您的网络连接或稍后再试';
-      } else if (errorMessage.includes('401') || errorMessage.includes('403')) {
+      setApiStatus('连接失败');
+      
+      if (errorMessage.includes('fetch') || errorMessage.includes('网络')) {
+        displayError = '无法连接到 PowerDrill API，请检查您的网络连接或API地址是否正确';
+      } else if (errorMessage.includes('401') || errorMessage.includes('403') || errorMessage.includes('无效的凭证')) {
         displayError = '无效的凭证，请检查您的 User ID 和 API Key';
       }
       
@@ -57,6 +63,10 @@ const LoginForm = () => {
         <CardHeader>
           <CardTitle className="text-2xl font-bold">PowerDrill AI Analyzer</CardTitle>
           <CardDescription>输入您的 PowerDrill 凭证以继续</CardDescription>
+          <div className="mt-2 bg-blue-50 p-2 rounded-md flex items-center text-sm text-blue-600">
+            <Info className="h-4 w-4 mr-2" />
+            <span>API地址: <code className="bg-blue-100 px-1 rounded">{API_BASE_URL}</code></span>
+          </div>
         </CardHeader>
         <CardContent>
           {error && (
@@ -90,6 +100,16 @@ const LoginForm = () => {
                 placeholder="输入您的 API Key"
                 required
               />
+            </div>
+            <div className="text-sm text-gray-500 mt-2">
+              <span>API连接状态: </span>
+              <span className={`font-medium ${
+                apiStatus === '已连接' ? 'text-green-600' : 
+                apiStatus === '正在连接...' ? 'text-yellow-600' :
+                apiStatus === '连接失败' ? 'text-red-600' : 'text-gray-600'
+              }`}>
+                {apiStatus}
+              </span>
             </div>
             <Button className="w-full" type="submit" disabled={loading}>
               {loading ? '登录中...' : '继续'}
