@@ -1,9 +1,8 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { PowerdrillAPI, PowerdrillCredentials, Dataset, DataSource, StreamChunk } from '../services/api';
 import { toast } from 'sonner';
 
-// Define the shape of our context
+// 定义上下文的形状
 interface PowerdrillContextType {
   credentials: PowerdrillCredentials | null;
   api: PowerdrillAPI;
@@ -30,7 +29,7 @@ interface PowerdrillContextType {
   clearCanvas: () => void;
 }
 
-// Message types for the chat
+// 聊天消息类型
 export interface Message {
   id: string;
   role: 'user' | 'assistant' | 'system';
@@ -43,7 +42,7 @@ export interface Message {
   datasetId?: string;
 }
 
-// Canvas content types
+// Canvas 内容类型
 export interface CanvasContent {
   message?: string;
   images?: string[];
@@ -53,10 +52,10 @@ export interface CanvasContent {
   }[];
 }
 
-// Create the context
+// 创建上下文
 const PowerdrillContext = createContext<PowerdrillContextType | undefined>(undefined);
 
-// Create a provider component
+// 创建 Provider 组件
 export const PowerdrillProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const api = new PowerdrillAPI();
   
@@ -70,7 +69,7 @@ export const PowerdrillProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [canvasContent, setCanvasContent] = useState<CanvasContent | null>(null);
   const [explorationQuestions, setExplorationQuestions] = useState<string[]>([]);
 
-  // Load saved credentials on mount
+  // 在组件挂载时加载保存的凭证
   useEffect(() => {
     const savedCredentials = api.loadCredentials();
     if (savedCredentials) {
@@ -79,22 +78,27 @@ export const PowerdrillProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   }, []);
 
-  // Set credentials
+  // 设置凭证
   const setCredentials = async (creds: PowerdrillCredentials): Promise<void> => {
     try {
       api.setCredentials(creds);
       
-      // Test the credentials with a simple API call
+      // 使用简单的 API 调用测试凭证
+      setIsLoading(true);
       await api.listDatasets();
       
       setCredentialsState(creds);
       setIsAuthenticated(true);
       return Promise.resolve();
     } catch (error) {
+      console.error("凭证验证失败:", error);
+      // 如果验证失败，清除凭证
       api.clearCredentials();
       setCredentialsState(null);
       setIsAuthenticated(false);
       return Promise.reject(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -456,11 +460,11 @@ export const PowerdrillProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   );
 };
 
-// Custom hook to use the Powerdrill context
+// 使用 Powerdrill 上下文的自定义钩子
 export const usePowerdrill = () => {
   const context = useContext(PowerdrillContext);
   if (context === undefined) {
-    throw new Error('usePowerdrill must be used within a PowerdrillProvider');
+    throw new Error('usePowerdrill 必须在 PowerdrillProvider 内部使用');
   }
   return context;
 };

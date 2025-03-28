@@ -20,21 +20,32 @@ const LoginForm = () => {
     setError('');
     
     if (!userId.trim() || !apiKey.trim()) {
-      setError('Please enter both User ID and API Key');
-      toast.error('Please enter both User ID and API Key');
+      setError('请输入 User ID 和 API Key');
+      toast.error('请输入 User ID 和 API Key');
       return;
     }
     
     setLoading(true);
     try {
-      // Set the credentials
+      // 设置凭证并尝试测试连接
       await setCredentials({ userId, apiKey });
-      toast.success('Successfully logged in');
+      toast.success('登录成功');
     } catch (error) {
-      console.error('Login error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to log in. Please check your credentials.';
-      setError(errorMessage);
-      toast.error(errorMessage);
+      console.error('登录错误:', error);
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : '登录失败，请检查您的凭证或网络连接';
+      
+      // 提供更明确的错误信息
+      let displayError = errorMessage;
+      if (errorMessage.includes('fetch')) {
+        displayError = '连接到 PowerDrill API 失败，请检查您的网络连接或稍后再试';
+      } else if (errorMessage.includes('401') || errorMessage.includes('403')) {
+        displayError = '无效的凭证，请检查您的 User ID 和 API Key';
+      }
+      
+      setError(displayError);
+      toast.error(displayError);
     } finally {
       setLoading(false);
     }
@@ -45,7 +56,7 @@ const LoginForm = () => {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl font-bold">PowerDrill AI Analyzer</CardTitle>
-          <CardDescription>Enter your PowerDrill credentials to continue</CardDescription>
+          <CardDescription>输入您的 PowerDrill 凭证以继续</CardDescription>
         </CardHeader>
         <CardContent>
           {error && (
@@ -63,7 +74,7 @@ const LoginForm = () => {
                 id="userId"
                 value={userId}
                 onChange={(e) => setUserId(e.target.value)}
-                placeholder="Enter your User ID"
+                placeholder="输入您的 User ID"
                 required
               />
             </div>
@@ -76,18 +87,18 @@ const LoginForm = () => {
                 type="password"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
-                placeholder="Enter your API Key"
+                placeholder="输入您的 API Key"
                 required
               />
             </div>
             <Button className="w-full" type="submit" disabled={loading}>
-              {loading ? 'Logging in...' : 'Continue'}
+              {loading ? '登录中...' : '继续'}
             </Button>
           </form>
         </CardContent>
         <CardFooter className="flex justify-center text-sm text-gray-500">
           <p>
-            Need PowerDrill credentials? Visit{' '}
+            需要 PowerDrill 凭证？访问{' '}
             <a
               href="https://powerdrill.ai"
               target="_blank"

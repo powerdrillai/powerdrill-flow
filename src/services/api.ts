@@ -1,16 +1,15 @@
-
 import { toast } from "sonner";
 
-// Base URL for the Powerdrill API
+// Powerdrill API 的基础URL
 const API_BASE_URL = "https://api.powerdrill.ai/v2";
 
-// Interface for API credentials
+// API 凭证接口
 export interface PowerdrillCredentials {
   userId: string;
   apiKey: string;
 }
 
-// Types for Dataset and DataSource
+// Dataset 和 DataSource 类型
 export interface Dataset {
   id: string;
   name: string;
@@ -47,7 +46,7 @@ export interface StreamChunk {
   data: any;
 }
 
-// Main API service class
+// 主 API 服务类
 export class PowerdrillAPI {
   private credentials: PowerdrillCredentials | null = null;
 
@@ -65,8 +64,14 @@ export class PowerdrillAPI {
   loadCredentials(): PowerdrillCredentials | null {
     const savedCredentials = localStorage.getItem('powerdrill_credentials');
     if (savedCredentials) {
-      this.credentials = JSON.parse(savedCredentials);
-      return this.credentials;
+      try {
+        this.credentials = JSON.parse(savedCredentials);
+        return this.credentials;
+      } catch (error) {
+        console.error("无法解析存储的凭证:", error);
+        localStorage.removeItem('powerdrill_credentials');
+        return null;
+      }
     }
     return null;
   }
@@ -78,7 +83,7 @@ export class PowerdrillAPI {
 
   private getHeaders() {
     if (!this.credentials) {
-      throw new Error("API credentials not set");
+      throw new Error("API 凭证未设置");
     }
 
     return {
@@ -89,6 +94,10 @@ export class PowerdrillAPI {
   }
 
   private async request(endpoint: string, options: RequestInit = {}) {
+    if (!this.credentials) {
+      throw new Error("API 凭证未设置");
+    }
+    
     try {
       const headers = this.getHeaders();
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -100,8 +109,27 @@ export class PowerdrillAPI {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `API request failed with status ${response.status}`);
+        let errorMessage = `API 请求失败，状态码: ${response.status}`;
+        
+        try {
+          const errorData = await response.json();
+          if (errorData.message) {
+            errorMessage = errorData.message;
+          }
+        } catch (e) {
+          // 如果不能解析为 JSON，使用默认错误消息
+        }
+        
+        // 针对常见状态码提供更具体的错误信息
+        if (response.status === 401 || response.status === 403) {
+          errorMessage = "无效的凭证，请检查您的 User ID 和 API Key";
+        } else if (response.status === 404) {
+          errorMessage = "请求的资源不存在";
+        } else if (response.status >= 500) {
+          errorMessage = "服务器错误，请稍后再试";
+        }
+        
+        throw new Error(errorMessage);
       }
 
       if (options.method === "DELETE") {
@@ -110,13 +138,21 @@ export class PowerdrillAPI {
 
       return await response.json();
     } catch (error) {
-      console.error("API request failed:", error);
-      toast.error(error instanceof Error ? error.message : "API request failed");
-      throw error;
+      console.error("API 请��失败:", error);
+      
+      // 区分网络错误和其他错误
+      if (error instanceof Error) {
+        if (error.message.includes('fetch') || error.message.includes('network')) {
+          throw new Error("无法连接到 PowerDrill API，请检查您的网络连接");
+        }
+        throw error;
+      }
+      
+      throw new Error("API 请求失败");
     }
   }
 
-  // Dataset operations
+  // Dataset 操作
   async createDataset(name: string) {
     return this.request("/datasets", {
       method: "POST",
@@ -143,7 +179,7 @@ export class PowerdrillAPI {
     });
   }
 
-  // Data source operations
+  // Data source 操作
   async createDataSource(datasetId: string, file: File) {
     const formData = new FormData();
     formData.append("file", file);
@@ -162,7 +198,7 @@ export class PowerdrillAPI {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `API request failed with status ${response.status}`);
+        throw new Error(errorData.message || `API 请求失败 with status ${response.status}`);
       }
 
       return await response.json();
@@ -188,7 +224,7 @@ export class PowerdrillAPI {
     });
   }
 
-  // Job operations
+  // Job 操作
   async createJob(datasetId: string, question: string, stream = true) {
     // For streaming, we need to handle the response differently
     if (stream) {
@@ -206,7 +242,7 @@ export class PowerdrillAPI {
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || `API request failed with status ${response.status}`);
+          throw new Error(errorData.message || `API 请求失败 with status ${response.status}`);
         }
 
         return response;
@@ -294,5 +330,5 @@ export class PowerdrillAPI {
   }
 }
 
-// Create a singleton instance
+// 创建单例实例
 export const powerdrill = new PowerdrillAPI();
