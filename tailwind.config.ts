@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -52,16 +53,12 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				sidebar: {
-					DEFAULT: 'hsl(var(--sidebar-background))',
-					foreground: 'hsl(var(--sidebar-foreground))',
-					primary: 'hsl(var(--sidebar-primary))',
-					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-					accent: 'hsl(var(--sidebar-accent))',
-					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-					border: 'hsl(var(--sidebar-border))',
-					ring: 'hsl(var(--sidebar-ring))'
-				}
+				// Custom colors
+				"powerdrill-blue": 'hsl(var(--powerdrill-blue))',
+				"powerdrill-light-blue": 'hsl(var(--powerdrill-light-blue))',
+				"powerdrill-dark-blue": 'hsl(var(--powerdrill-dark-blue))',
+				"powerdrill-gray": 'hsl(var(--powerdrill-gray))',
+				"powerdrill-dark-gray": 'hsl(var(--powerdrill-dark-gray))',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
