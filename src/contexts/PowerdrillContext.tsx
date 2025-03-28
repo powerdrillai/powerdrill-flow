@@ -15,7 +15,7 @@ interface PowerdrillContextType {
   messages: Message[];
   canvasContent: CanvasContent | null;
   explorationQuestions: string[];
-  setCredentials: (creds: PowerdrillCredentials) => void;
+  setCredentials: (creds: PowerdrillCredentials) => Promise<void>;
   logout: () => void;
   loadDatasets: () => Promise<void>;
   createDataset: (name: string) => Promise<Dataset>;
@@ -80,10 +80,22 @@ export const PowerdrillProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   }, []);
 
   // Set credentials
-  const setCredentials = (creds: PowerdrillCredentials) => {
-    api.setCredentials(creds);
-    setCredentialsState(creds);
-    setIsAuthenticated(true);
+  const setCredentials = async (creds: PowerdrillCredentials): Promise<void> => {
+    try {
+      api.setCredentials(creds);
+      
+      // Test the credentials with a simple API call
+      await api.listDatasets();
+      
+      setCredentialsState(creds);
+      setIsAuthenticated(true);
+      return Promise.resolve();
+    } catch (error) {
+      api.clearCredentials();
+      setCredentialsState(null);
+      setIsAuthenticated(false);
+      return Promise.reject(error);
+    }
   };
 
   // Logout
