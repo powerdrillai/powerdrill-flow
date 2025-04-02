@@ -1,0 +1,13 @@
+---
+description: 
+globs: *.ts,*.tsx
+alwaysApply: false
+---
+
+# Best practices for using TanStack React Query with Next.js
+
+- Use `useQuery` for fetching data and managing loading states
+- Implement `useMutation` for handling side effects like form submissions
+- Implement optimistic updates with `useMutation` for better UX
+- Use `queryKey` effectively for dependent queries and query invalidation
+

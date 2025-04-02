@@ -1,0 +1,14 @@
+---
+description: 
+globs: *.ts,*.tsx
+alwaysApply: false
+---
+
+# Best practices for using the Fetch API in Next.js
+
+- Use `fetch` with `cache: 'no-store'` for dynamic data in server components
+- Implement `fetch` with `next: { revalidate: number }` for ISR (Incremental Static Regeneration)
+- Use `fetch` with `cache: 'force-cache'` for static data in server components
+- Handle errors gracefully with try/catch blocks when using `fetch`
+- Utilize `AbortController` for cancelling ongoing fetch requests when needed
+

@@ -1,0 +1,10 @@
+---
+description: 
+globs: **/*
+alwaysApply: false
+---
+
+- Use lowercase letters and hyphens for file and folder names
+- Avoid using underscores or camelCase in file names
+- Ensure consistency across the entire project
+- Use descriptive names to improve readability and maintainability
