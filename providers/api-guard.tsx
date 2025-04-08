@@ -37,11 +37,9 @@ export function ApiGuardProvider({ children }: ApiGuardProps) {
   // Display loading state
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="mb-4 h-8 w-8 animate-spin rounded-full border-t-2 border-b-2 border-blue-500"></div>
-          <p>Verifying API settings...</p>
-        </div>
+      <div className="flex min-h-screen flex-col items-center justify-center">
+        <div className="mb-4 h-8 w-8 animate-spin rounded-full border-t-2 border-b-2 border-blue-500"></div>
+        <p>Verifying API settings...</p>
       </div>
     );
   }
