@@ -121,15 +121,17 @@ export interface TaskBlock extends BaseAnswerBlock {
   content: TaskContent;
 }
 
+export type AnswerBlock =
+  | MessageBlock
+  | CodeBlock
+  | TableBlock
+  | ImageBlock
+  | SourcesBlock
+  | QuestionsBlock
+  | TaskBlock;
+
 export interface Answer {
-  blocks: (
-    | MessageBlock
-    | CodeBlock
-    | TableBlock
-    | ImageBlock
-    | SourcesBlock
-    | QuestionsBlock
-  )[];
+  blocks: AnswerBlock[];
 }
 
 export interface JobRecord {

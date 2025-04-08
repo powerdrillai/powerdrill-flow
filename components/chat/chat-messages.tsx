@@ -2,6 +2,7 @@
 
 import Message from "@/components/messages/message";
 import { MessageGroup } from "@/hooks/usePowerdrillChat";
+import { AnswerBlock } from "@/services/powerdrill/session.service";
 
 import { QuestionsBlockComponent } from "../messages/message-blocks/questions-block";
 
@@ -10,6 +11,7 @@ interface ChatMessagesProps {
   questions?: string[];
   isLoading: boolean;
   onQuestionClick?: (question: string) => void;
+  onBlockPreview?: (block: AnswerBlock) => void;
 }
 
 export default function ChatMessages({
@@ -17,6 +19,7 @@ export default function ChatMessages({
   isLoading,
   questions,
   onQuestionClick,
+  onBlockPreview,
 }: ChatMessagesProps) {
   return (
     <div className="space-y-6 py-4">
@@ -26,6 +29,7 @@ export default function ChatMessages({
           message={message}
           isLoading={isLoading && index === messages.length - 1}
           isLast={index === messages.length - 1}
+          onBlockPreview={onBlockPreview}
         />
       ))}
 

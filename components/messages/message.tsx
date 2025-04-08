@@ -3,25 +3,32 @@
 import { IconCircleCheckFilled } from "@tabler/icons-react";
 import { Loader2Icon } from "lucide-react";
 
-import { MessageGroup } from "@/hooks/usePowerdrillChat";
-import { cn } from "@/lib/utils";
-
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "../ui/collapsible";
-import { LoadingDots } from "../ui/loading-dots";
-import { TooltipWrapper } from "../ui/tooltip-wrapper";
+} from "@/components/ui/collapsible";
+import { LoadingDots } from "@/components/ui/loading-dots";
+import { TooltipWrapper } from "@/components/ui/tooltip-wrapper";
+import { MessageGroup } from "@/hooks/usePowerdrillChat";
+import { cn } from "@/lib/utils";
+import { AnswerBlock } from "@/services/powerdrill/session.service";
+
 import MessageBlock from "./message-blocks";
 
 interface MessageProps {
   message: MessageGroup;
   isLoading?: boolean;
   isLast?: boolean;
+  onBlockPreview?: (block: AnswerBlock) => void;
 }
 
-export default function Message({ message, isLoading, isLast }: MessageProps) {
+export default function Message({
+  message,
+  isLoading,
+  isLast,
+  onBlockPreview,
+}: MessageProps) {
   const { question, answer, job_id } = message;
   return (
     <div className="space-y-4">
@@ -61,6 +68,7 @@ export default function Message({ message, isLoading, isLast }: MessageProps) {
                         <MessageBlock
                           key={`${job_id}-answer-block-${index}`}
                           block={block}
+                          onBlockPreview={onBlockPreview}
                         />
                       );
                     }
@@ -100,6 +108,7 @@ export default function Message({ message, isLoading, isLast }: MessageProps) {
                       <MessageBlock
                         key={`${job_id}-answer-block-${index}`}
                         block={block}
+                        onBlockPreview={onBlockPreview}
                       />
                     ))}
                   </div>

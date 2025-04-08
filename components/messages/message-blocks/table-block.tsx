@@ -20,6 +20,7 @@ import { TableBlock } from "@/services/powerdrill/session.service";
 interface TableBlockProps {
   block: TableBlock;
   isCanvas?: boolean;
+  onBlockPreview?: (block: TableBlock) => void;
 }
 
 export function TableBlockView({ block }: TableBlockProps) {
@@ -115,6 +116,7 @@ export function TableBlockView({ block }: TableBlockProps) {
 export function TableBlockComponent({
   block,
   isCanvas = false,
+  onBlockPreview,
 }: TableBlockProps) {
   if (isCanvas) {
     return <TableBlockView block={block} />;
@@ -140,7 +142,12 @@ export function TableBlockComponent({
       </div>
       <div className="flex items-center">
         <TooltipWrapper title="View">
-          <Button variant="ghost" size="icon" className="size-6">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-6"
+            onClick={() => onBlockPreview?.(block)}
+          >
             <IconEye size={16} />
           </Button>
         </TooltipWrapper>

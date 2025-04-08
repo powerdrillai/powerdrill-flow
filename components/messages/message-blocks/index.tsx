@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  CodeBlock,
-  ImageBlock,
-  MessageBlock as MessageBlockType,
-  QuestionsBlock,
-  SourcesBlock,
-  TableBlock,
-  TaskBlock,
-} from "@/services/powerdrill/session.service";
+import { AnswerBlock } from "@/services/powerdrill/session.service";
 
 import { ImageBlockComponent } from "./image-block";
 import { MessageMarkdown } from "./message-markdown";
@@ -17,20 +9,14 @@ import { SourcesBlockComponent } from "./sources-block";
 import { TableBlockComponent } from "./table-block";
 
 type BlockProps = {
-  block:
-    | MessageBlockType
-    | CodeBlock
-    | TableBlock
-    | ImageBlock
-    | SourcesBlock
-    | QuestionsBlock
-    | TaskBlock;
+  block: AnswerBlock;
 };
 
 interface MessageBlockProps extends BlockProps {
   isLast?: boolean;
   isCanvas?: boolean;
   onQuestionClick?: (question: string) => void;
+  onBlockPreview?: (block: AnswerBlock) => void;
 }
 
 export default function MessageBlocks({
@@ -38,6 +24,7 @@ export default function MessageBlocks({
   isLast,
   isCanvas = false,
   onQuestionClick,
+  onBlockPreview,
 }: MessageBlockProps) {
   switch (block.type) {
     case "MESSAGE":
@@ -46,19 +33,23 @@ export default function MessageBlocks({
 
     case "TABLE":
       return (
-        <TableBlockComponent isCanvas={isCanvas} block={block as TableBlock} />
+        <TableBlockComponent
+          isCanvas={isCanvas}
+          block={block}
+          onBlockPreview={onBlockPreview}
+        />
       );
 
     case "IMAGE":
-      return <ImageBlockComponent block={block as ImageBlock} />;
+      return <ImageBlockComponent block={block} />;
 
     case "SOURCES":
-      return <SourcesBlockComponent block={block as SourcesBlock} />;
+      return <SourcesBlockComponent block={block} />;
 
     case "QUESTIONS":
       return (
         <QuestionsBlockComponent
-          block={block as QuestionsBlock}
+          block={block}
           isLast={isLast}
           onQuestionClick={onQuestionClick}
         />

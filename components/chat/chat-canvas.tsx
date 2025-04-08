@@ -1,23 +1,34 @@
 import { Loader2Icon } from "lucide-react";
 
 import { MessageGroup } from "@/hooks/usePowerdrillChat";
+import { AnswerBlock } from "@/services/powerdrill/session.service";
 
 import MessageBlocks from "../messages/message-blocks";
+import { ChatBlockPreview } from "./chat-block-preview";
 
 interface ChatCanvasProps {
   messages: MessageGroup[];
   isLoading: boolean;
-  onQuestionClick?: (question: string) => void;
+  blockPreview?: AnswerBlock;
+  onClearBlockPreview?: () => void;
 }
 
 export function ChatCanvas({
   messages,
   isLoading,
-  onQuestionClick,
+  blockPreview,
+  onClearBlockPreview,
 }: ChatCanvasProps) {
+  console.log(blockPreview, "blockPreview");
   // Get the last message
   const lastMessage =
     messages.length > 0 ? messages[messages.length - 1] : null;
+
+  if (blockPreview) {
+    return (
+      <ChatBlockPreview block={blockPreview} onClear={onClearBlockPreview} />
+    );
+  }
 
   return (
     <div className="h-full space-y-6 overflow-y-auto scroll-smooth p-4">
@@ -39,7 +50,6 @@ export function ChatCanvas({
                         key={`${lastMessage.job_id}-answer-block-${index}`}
                         isCanvas={true}
                         block={block}
-                        onQuestionClick={onQuestionClick}
                       />
                     );
                   }
