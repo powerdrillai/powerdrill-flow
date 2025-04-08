@@ -1,8 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import React, { ReactNode, useEffect } from "react";
+import React, { ReactNode } from "react";
 
 import { hasApiCredentials } from "@/lib/cookies/cookie-manager";
 
@@ -11,10 +10,9 @@ interface ApiGuardProps {
 }
 
 export function ApiGuardProvider({ children }: ApiGuardProps) {
-  const router = useRouter();
-
-  // Use TanStack Query to check API credentials
-  const { data: isConfigured, isLoading } = useQuery({
+  // Use TanStack Query to check API credentials, but don't redirect
+  // Since middleware is handling the redirect now
+  const { isLoading } = useQuery({
     queryKey: ["apiCredentials", "check"],
     queryFn: async () => {
       try {
@@ -26,13 +24,6 @@ export function ApiGuardProvider({ children }: ApiGuardProps) {
       }
     },
   });
-
-  // Redirect to setup page when credentials check is complete and not configured
-  useEffect(() => {
-    if (isConfigured === false) {
-      router.push("/setup");
-    }
-  }, [isConfigured, router]);
 
   // Display loading state
   if (isLoading) {

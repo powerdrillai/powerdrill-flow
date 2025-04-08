@@ -133,16 +133,6 @@
 /* Login form custom styles */
 .dark .auth-card-glow {
   box-shadow: 0 0 20px 2px rgba(96, 165, 250, 0.05);
-  animation: pulse 5s infinite alternate;
-}
-
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 15px 1px rgba(96, 165, 250, 0.05);
-  }
-  100% {
-    box-shadow: 0 0 25px 3px rgba(96, 165, 250, 0.15);
-  }
 }
 
 /* Auth container positioning */
