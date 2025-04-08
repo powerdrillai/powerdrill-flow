@@ -1,6 +1,6 @@
 "use client";
 
-import { IconEye, IconFileText } from "@tabler/icons-react";
+import { IconDownload, IconEye, IconFileText } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import Papa from "papaparse";
 
@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { TooltipWrapper } from "@/components/ui/tooltip-wrapper";
 import { TableBlock } from "@/services/powerdrill/session.service";
 
 interface TableBlockProps {
@@ -49,15 +50,42 @@ export function TableBlockView({ block }: TableBlockProps) {
   const totalRows = csvData?.rows.length || 0;
   const hasMoreRows = totalRows > 20;
 
+  const handleDownload = () => {
+    if (url) {
+      // Create a temporary anchor element to trigger download
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = block.content.name || "download.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  };
+
   return (
     <div className="space-y-2">
       {csvData && (
         <>
-          {hasMoreRows && (
-            <div className="text-muted-foreground mb-2 text-sm">
-              Showing first 20 rows (total {totalRows} rows)
+          <div className="flex items-center justify-between">
+            {hasMoreRows && (
+              <div className="text-muted-foreground text-sm">
+                Showing first 20 rows (total {totalRows} rows)
+              </div>
+            )}
+            <div className="flex items-center">
+              <TooltipWrapper title="Download CSV">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center gap-1"
+                  onClick={handleDownload}
+                >
+                  <IconDownload size={14} />
+                  <span className="text-xs">Download</span>
+                </Button>
+              </TooltipWrapper>
             </div>
-          )}
+          </div>
           <div className="overflow-hidden rounded-md border">
             <Table>
               <TableHeader>
@@ -92,15 +120,41 @@ export function TableBlockComponent({
     return <TableBlockView block={block} />;
   }
 
+  const handleDownload = () => {
+    if (block.content.url) {
+      // Create a temporary anchor element to trigger download
+      const a = document.createElement("a");
+      a.href = block.content.url;
+      a.download = block.content.name || "download.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  };
+
   return (
     <div className="bg-muted flex items-center justify-between rounded-md px-4 py-2">
       <div className="flex items-center gap-2">
         <IconFileText size={16} />
         <span className="text-sm">{block.content.name}</span>
       </div>
-      <Button variant="ghost" size="icon" className="size-6">
-        <IconEye size={16} />
-      </Button>
+      <div className="flex items-center">
+        <TooltipWrapper title="View">
+          <Button variant="ghost" size="icon" className="size-6">
+            <IconEye size={16} />
+          </Button>
+        </TooltipWrapper>
+        <TooltipWrapper title="Download">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-6"
+            onClick={handleDownload}
+          >
+            <IconDownload size={16} />
+          </Button>
+        </TooltipWrapper>
+      </div>
     </div>
   );
 }

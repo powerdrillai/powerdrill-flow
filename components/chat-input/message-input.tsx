@@ -19,9 +19,9 @@ export function MessageInput({
       onChange={(e) => onChange?.(e.target.value)}
       onKeyDown={onKeyDown}
       placeholder="Send a message..."
-      className="resize-none border-none bg-transparent p-2 text-base placeholder:text-gray-400 focus-visible:ring-0"
+      className="resize-none border-none !bg-transparent p-2 text-base shadow-none placeholder:text-gray-400 focus-visible:ring-0"
       disabled={isLoading}
-      rows={3}
+      rows={2}
     />
   );
 }

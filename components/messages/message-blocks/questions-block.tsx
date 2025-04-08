@@ -26,7 +26,7 @@ export function QuestionsBlockComponent({
             size="sm"
             disabled={!isLast}
             onClick={() => onQuestionClick?.(question)}
-            className="justify-start"
+            className="dark:bg-accent dark:text-accent-foreground justify-start"
           >
             <div className="h-fit w-full py-2 text-left text-base font-normal !whitespace-normal">
               {question}

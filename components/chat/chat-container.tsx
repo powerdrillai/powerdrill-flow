@@ -5,13 +5,13 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import ChatInput from "@/components/chat-input";
+import { AppHeader } from "@/components/ui/app-header";
 import { usePowerdrillChat } from "@/hooks/usePowerdrillChat";
 import { useSession } from "@/hooks/useSession";
 import { useSessionStore } from "@/store/session-store";
 
 import { ChatCanvas } from "./chat-canvas";
 import ChatMessages from "./chat-messages";
-import SessionHeader from "./session-header";
 import SplitLayout from "./split-layout";
 
 interface ChatContainerProps {
@@ -26,7 +26,7 @@ export default function ChatContainer({ sessionId }: ChatContainerProps) {
   const datasourceId =
     sessionState?.selectedDataset?.datasource.map((item) => item.id) || [];
 
-  const { history, isLoadingHistory, session, isCreating, createSession } =
+  const { history, isLoadingHistory, session, createSession } =
     useSession(sessionId);
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -124,25 +124,29 @@ export default function ChatContainer({ sessionId }: ChatContainerProps) {
     }
   };
 
+  // Update page title with session name
+  useEffect(() => {
+    if (session) {
+      document.title = `${session.name || "Chat"} - Powerdrill Flow`;
+    }
+  }, [session]);
+
   const chatContent = (
-    <div className="flex h-full flex-col pb-4">
-      <SessionHeader
-        session={session}
-        loading={isCreating}
-        onNewSession={handleCreateSession}
-      />
+    <div className="flex h-full flex-col pb-2">
       <div
         ref={chatContainerRef}
         onScroll={handleScroll}
-        className="mx-auto w-full max-w-4xl flex-1 overflow-y-auto scroll-smooth px-4 py-4"
+        className="mb-2 flex-1 overflow-y-auto scroll-smooth px-4 py-4"
       >
-        <ChatMessages
-          messages={messages}
-          isLoading={isLoading || isLoadingHistory}
-          onQuestionClick={handleQuestionClick}
-        />
+        <div className="mx-auto w-full max-w-4xl">
+          <ChatMessages
+            messages={messages}
+            isLoading={isLoading || isLoadingHistory}
+            onQuestionClick={handleQuestionClick}
+          />
+        </div>
       </div>
-      <div className="mx-auto mt-6 mb-4 w-full max-w-4xl">
+      <div className="mx-auto w-full max-w-4xl px-4">
         <ChatInput
           input={input}
           onInputChange={handleInputChange}
@@ -159,12 +163,21 @@ export default function ChatContainer({ sessionId }: ChatContainerProps) {
   );
 
   return (
-    <SplitLayout
-      collapsed={collapsed}
-      onToggle={handleToggleSidebar}
-      sidebarContent={<ChatCanvas messages={messages} isLoading={isLoading} />}
-    >
-      {chatContent}
-    </SplitLayout>
+    <>
+      <AppHeader
+        title={session?.name || "Chat"}
+        sessionId={sessionId}
+        onNewSession={handleCreateSession}
+      />
+      <SplitLayout
+        collapsed={collapsed}
+        onToggle={handleToggleSidebar}
+        sidebarContent={
+          <ChatCanvas messages={messages} isLoading={isLoading} />
+        }
+      >
+        {chatContent}
+      </SplitLayout>
+    </>
   );
 }

@@ -20,7 +20,7 @@ export function Toolbar({
   sessionId,
 }: ToolbarProps) {
   return (
-    <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3">
+    <div className="flex items-center justify-between px-4 py-3">
       <div className="flex-grow"></div>
       <div className="flex items-center gap-3">
         <FileSelector disabled={isLoading} sessionId={sessionId} />

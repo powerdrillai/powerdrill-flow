@@ -19,7 +19,7 @@ export default function SplitLayout({
   onToggle,
 }: SplitLayoutProps) {
   return (
-    <div className="flex h-screen w-full">
+    <div className="flex h-screen w-full overflow-hidden">
       {/* Left Sidebar */}
       <div
         className={`relative border-r transition-all duration-300 ease-in-out ${
@@ -29,31 +29,32 @@ export default function SplitLayout({
         {/* Toggle Button */}
         <button
           onClick={() => onToggle(!collapsed)}
-          className={`absolute top-24 -right-6 z-[1] flex h-12 w-6 items-center justify-center rounded-r-lg border border-l-0 border-gray-200 bg-white shadow-md hover:bg-gray-50 ${
-            collapsed ? "bg-blue-50 hover:bg-blue-100" : ""
+          className={`bg-background/90 hover:bg-background absolute top-24 -right-6 z-[1] flex h-12 w-6 items-center justify-center rounded-r-lg border border-l-0 shadow-md ${
+            collapsed ? "bg-background/90 hover:bg-background" : ""
           }`}
         >
           {collapsed ? (
-            <ChevronRight className="h-5 w-5 text-blue-600" />
+            <ChevronRight className="text-primary h-5 w-5" />
           ) : (
-            <ChevronLeft className="h-5 w-5" />
+            <ChevronLeft className="text-primary h-5 w-5" />
           )}
         </button>
 
         {/* Sidebar Content */}
         <div
           className={cn(
-            `mx-auto h-full max-w-4xl overflow-hidden px-6`,
+            `h-full overflow-y-auto`,
             collapsed ? "invisible" : "visible"
           )}
         >
-          {/* Content to be added here */}
-          {sidebarContent}
+          <div className="mx-auto h-full max-w-4xl px-6">{sidebarContent}</div>
         </div>
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 overflow-hidden">{children}</div>
+      <div className="flex-1 overflow-y-auto pb-4 md:pb-8 lg:pb-12">
+        {children}
+      </div>
     </div>
   );
 }

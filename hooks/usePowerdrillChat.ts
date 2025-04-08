@@ -18,7 +18,7 @@ import {
 } from "@/services/powerdrill/session.service";
 import { PowerdrillEventType } from "@/types/powerdrill";
 
-// Task块接口定义
+// Task block interface definition
 
 export interface Answer {
   blocks: (
@@ -58,14 +58,14 @@ export interface PowerdrillChatOptions {
   onError?: (error: Error) => void;
 }
 
-// 定义事件数据类型
+// Define event data type
 interface EventMetadata {
   group_id?: string;
   group_name?: string;
   stage?: string;
 }
 
-// 定义事件数据类型
+// Define event data type
 interface EventData {
   choices?: Array<{
     delta?: {
@@ -83,7 +83,7 @@ interface EventData {
   stage?: string;
 }
 
-// 定义流事件类型
+// Define stream event type
 interface StreamEvent {
   data: string;
   event: string;
@@ -91,7 +91,7 @@ interface StreamEvent {
   retry?: number;
 }
 
-// 定义块类型的联合类型
+// Define union type for blocks
 type AnswerBlock =
   | MessageBlock
   | CodeBlock
@@ -101,7 +101,7 @@ type AnswerBlock =
   | QuestionsBlock
   | TaskBlock;
 
-// 定义累积器中块的类型
+// Define block type in accumulator
 interface AccumulatedBlock {
   type: string;
   content: unknown;
@@ -110,23 +110,23 @@ interface AccumulatedBlock {
   stage?: string;
 }
 
-// 消息累积器类型
+// Message accumulator type
 interface MessageAccumulator {
   originalQuestion: string;
   accumulatedBlocks: AccumulatedBlock[];
 }
 
-// 验证并标准化Message对象，确保格式一致
+// Validate and standardize Message object, ensure consistent format
 function normalizeMessage(message: MessageGroup): MessageGroup {
   const normalizedMessage = { ...message };
 
-  // 确保question字段和blocks数组存在
+  // Ensure question field and blocks array exist
   if (!normalizedMessage.question) {
     normalizedMessage.question = {
       blocks: [
         {
           type: "MESSAGE",
-          content: "查询内容不可用",
+          content: "Query content not available",
         },
       ],
     };
@@ -146,14 +146,14 @@ function normalizeMessage(message: MessageGroup): MessageGroup {
     };
   }
 
-  // 确保answer数组存在
+  // Ensure answer array exists
   if (!normalizedMessage.answer) {
     normalizedMessage.answer = [];
   } else if (!Array.isArray(normalizedMessage.answer)) {
     normalizedMessage.answer = [];
   }
 
-  // 确保job_id存在
+  // Ensure job_id exists
   if (!normalizedMessage.job_id) {
     normalizedMessage.job_id = `job_${Date.now()}`;
   }
@@ -161,7 +161,7 @@ function normalizeMessage(message: MessageGroup): MessageGroup {
   return normalizedMessage;
 }
 
-// 将PowerDrill事件类型映射到Answer Block类型
+// Map PowerDrill event types to Answer Block types
 function mapToAnswerBlock(
   type: string,
   content: unknown,
@@ -188,9 +188,9 @@ function mapToAnswerBlock(
     case "QUESTIONS":
       return { ...baseBlock, type: "QUESTIONS", content: content as string[] };
     case "TASK":
-      // TASK类型可能需要特殊处理
+      // TASK type may need special processing
       const taskContent = content as TaskContent;
-      // 确保status字段存在且有效
+      // Ensure status field exists and is valid
       if (!taskContent.status) {
         taskContent.status = "running";
       }

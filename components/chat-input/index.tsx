@@ -52,7 +52,7 @@ export default function ChatInput({
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-[95%] flex-col rounded-xl border bg-white shadow-sm">
+    <div className="bg-background mx-auto flex w-full max-w-[95%] flex-col rounded-xl border shadow-sm">
       {/* Dataset display row */}
       <DatasetInfo
         dataset={session?.selectedDataset}
@@ -66,7 +66,7 @@ export default function ChatInput({
       />
 
       {/* Input field row */}
-      <div className="px-4 pt-2">
+      <div className="px-4 py-1">
         <MessageInput
           value={input || ""}
           onChange={onInputChange}

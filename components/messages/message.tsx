@@ -33,7 +33,7 @@ export default function Message({
     <div className="space-y-4">
       {/* User question */}
       <div className="flex justify-end">
-        <div className="bg-muted max-w-[80%] rounded-md p-2">
+        <div className="bg-accent max-w-[80%] rounded-md p-2">
           {question.blocks.map((block, index) => (
             <MessageBlock
               key={`${job_id}-question-block-${index}`}

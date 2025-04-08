@@ -22,7 +22,7 @@ export function ExplorationQuestions({
             key={index}
             variant="secondary"
             size="sm"
-            className="h-6 text-xs"
+            className="dark:bg-accent dark:text-accent-foreground h-6 text-xs"
             onClick={() => onQuestionClick(question)}
           >
             <span className="max-w-[200px] truncate">{question}</span>

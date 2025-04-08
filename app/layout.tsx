@@ -7,6 +7,7 @@ import { Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { ApiGuardProvider } from "@/providers/api-guard";
 import { QueryClientProvider } from "@/providers/query-client";
+import { ThemeProvider } from "@/providers/theme-provider";
 
 const geist_sans = Geist({
   subsets: ["latin"],
@@ -19,23 +20,34 @@ const geist_mono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PowerDrill Flow",
+  title: "Powerdrill Flow",
   description: "Make your data flow easily",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
+interface RootLayoutProps {
   children: React.ReactNode;
-}>) {
+}
+
+export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
   return (
     <html lang="en">
       <body
         className={`${geist_sans.variable} ${geist_mono.variable} antialiased`}
       >
-        <QueryClientProvider>
-          <ApiGuardProvider>{children}</ApiGuardProvider>
-        </QueryClientProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <QueryClientProvider>
+            <ApiGuardProvider>
+              <div className="flex min-h-screen flex-col">
+                <main className="flex flex-1 flex-col">{children}</main>
+              </div>
+            </ApiGuardProvider>
+          </QueryClientProvider>
+        </ThemeProvider>
         <Toaster />
       </body>
     </html>

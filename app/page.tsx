@@ -6,6 +6,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import ChatInput from "@/components/chat-input";
+import { AppHeader } from "@/components/ui/app-header";
 import { useSession } from "@/hooks/useSession";
 import { useSessionStore } from "@/store/session-store";
 
@@ -15,13 +16,13 @@ export default function Home() {
   const { sessionMap, setSession, clearSession } = useSessionStore();
   const sessionState = sessionMap["home"];
 
-  // 使用 TanStack Query 的会话钩子
+  // Using TanStack Query session hooks
   const { createSession, isCreating } = useSession();
 
   const handleCreateSession = async (question: string) => {
     console.log(question, "finalQuestion--");
     try {
-      // 创建会话
+      // Create session
       const sessionName =
         question.slice(0, 30) + (question.length > 30 ? "..." : "");
       const sessionId = await createSession({
@@ -35,7 +36,7 @@ export default function Home() {
 
       clearSession("home");
 
-      // 重定向到会话页面
+      // Redirect to chat page
       router.push(`/chat/${sessionId}`);
     } catch (_error) {
       toast.error("Failed to create session, please try again");
@@ -49,18 +50,23 @@ export default function Home() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4">
-      <h6 className="text-2xl font-bold">What do you want to analyze today?</h6>
-      <div className="mx-auto w-full max-w-3xl min-w-xl">
-        <ChatInput
-          input={inputValue}
-          onInputChange={setInputValue}
-          onSubmit={handleSendMessage}
-          onQuestionClick={handleCreateSession}
-          isLoading={isCreating}
-          sessionId="home"
-        />
+    <>
+      <AppHeader />
+      <div className="home-container">
+        <h6 className="mb-6 text-2xl font-bold">
+          What do you want to analyze today?
+        </h6>
+        <div className="mx-auto w-full max-w-3xl min-w-xl">
+          <ChatInput
+            input={inputValue}
+            onInputChange={setInputValue}
+            onSubmit={handleSendMessage}
+            onQuestionClick={handleCreateSession}
+            isLoading={isCreating}
+            sessionId="home"
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
