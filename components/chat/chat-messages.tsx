@@ -3,8 +3,11 @@
 import Message from "@/components/messages/message";
 import { MessageGroup } from "@/hooks/usePowerdrillChat";
 
+import { QuestionsBlockComponent } from "../messages/message-blocks/questions-block";
+
 interface ChatMessagesProps {
   messages: MessageGroup[];
+  questions?: string[];
   isLoading: boolean;
   onQuestionClick?: (question: string) => void;
 }
@@ -12,6 +15,7 @@ interface ChatMessagesProps {
 export default function ChatMessages({
   messages,
   isLoading,
+  questions,
   onQuestionClick,
 }: ChatMessagesProps) {
   return (
@@ -22,9 +26,19 @@ export default function ChatMessages({
           message={message}
           isLoading={isLoading && index === messages.length - 1}
           isLast={index === messages.length - 1}
-          onQuestionClick={onQuestionClick}
         />
       ))}
+
+      {questions && (
+        <QuestionsBlockComponent
+          isLast
+          block={{
+            type: "QUESTIONS",
+            content: questions,
+          }}
+          onQuestionClick={onQuestionClick}
+        />
+      )}
 
       {messages.length === 0 && !isLoading && (
         <div className="text-muted-foreground flex h-40 items-center justify-center">

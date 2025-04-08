@@ -14,6 +14,10 @@ export function QuestionsBlockComponent({
   isLast,
   onQuestionClick,
 }: QuestionsBlockProps) {
+  if (!block.content || block.content.length === 0) {
+    return null;
+  }
+
   return (
     <div className="space-y-2">
       <h4 className="text-base font-medium">More Questions</h4>
@@ -28,7 +32,7 @@ export function QuestionsBlockComponent({
             onClick={() => onQuestionClick?.(question)}
             className="dark:bg-accent dark:text-accent-foreground justify-start"
           >
-            <div className="h-fit w-full py-2 text-left text-base font-normal !whitespace-normal">
+            <div className="h-fit w-full justify-start py-2 text-base font-normal !whitespace-normal">
               {question}
             </div>
           </Button>

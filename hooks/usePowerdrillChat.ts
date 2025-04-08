@@ -317,6 +317,7 @@ export function usePowerdrillChat({
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [questions, setQuestions] = useState<string[]>([]);
 
   // References
   const currentJobIdRef = useRef<string | null>(null);
@@ -617,10 +618,12 @@ export function usePowerdrillChat({
           break;
         case "TABLE":
         case "IMAGE":
-        case "QUESTIONS":
-          // case "SOURCES":
           addDirectBlock(eventType, content, metadata);
           break;
+        case "QUESTIONS":
+          setQuestions(content as string[]);
+          break;
+        // case "SOURCES":
       }
 
       // Update UI
@@ -676,6 +679,7 @@ export function usePowerdrillChat({
       // Reset states
       setIsLoading(true);
       setError(null);
+      setQuestions([]);
 
       const jobId = uuidv4();
       currentJobIdRef.current = jobId;
@@ -811,6 +815,7 @@ export function usePowerdrillChat({
 
   return {
     messages,
+    questions,
     input,
     handleInputChange,
     handleSubmit: submitMessage,

@@ -36,14 +36,20 @@ export default function ChatContainer({ sessionId }: ChatContainerProps) {
   const hasAutoOpenedSidebarRef = useRef(false);
 
   // Use PowerdrillChat hook
-  const { messages, handleSubmit, handleInputChange, input, isLoading } =
-    usePowerdrillChat({
-      api: "/api/chat",
-      sessionId,
-      datasetId,
-      datasourceId,
-      initialMessages: history?.records || [],
-    });
+  const {
+    messages,
+    questions,
+    input,
+    isLoading,
+    handleSubmit,
+    handleInputChange,
+  } = usePowerdrillChat({
+    api: "/api/chat",
+    sessionId,
+    datasetId,
+    datasourceId,
+    initialMessages: history?.records || [],
+  });
 
   // Handle auto-scroll
   useEffect(() => {
@@ -141,6 +147,7 @@ export default function ChatContainer({ sessionId }: ChatContainerProps) {
         <div className="mx-auto w-full max-w-4xl">
           <ChatMessages
             messages={messages}
+            questions={questions}
             isLoading={isLoading || isLoadingHistory}
             onQuestionClick={handleQuestionClick}
           />

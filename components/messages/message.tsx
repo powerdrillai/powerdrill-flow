@@ -19,15 +19,9 @@ interface MessageProps {
   message: MessageGroup;
   isLoading?: boolean;
   isLast?: boolean;
-  onQuestionClick?: (question: string) => void;
 }
 
-export default function Message({
-  message,
-  isLoading,
-  isLast,
-  onQuestionClick,
-}: MessageProps) {
+export default function Message({ message, isLoading, isLast }: MessageProps) {
   const { question, answer, job_id } = message;
   return (
     <div className="space-y-4">
@@ -67,7 +61,6 @@ export default function Message({
                         <MessageBlock
                           key={`${job_id}-answer-block-${index}`}
                           block={block}
-                          onQuestionClick={onQuestionClick}
                         />
                       );
                     }
@@ -107,7 +100,6 @@ export default function Message({
                       <MessageBlock
                         key={`${job_id}-answer-block-${index}`}
                         block={block}
-                        onQuestionClick={onQuestionClick}
                       />
                     ))}
                   </div>
