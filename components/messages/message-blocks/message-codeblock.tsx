@@ -66,7 +66,7 @@ export const MessageCodeBlock: FC<MessageCodeBlockProps> = memo(
         <Collapsible open={open} onOpenChange={setOpen}>
           <div
             className={cn(
-              "flex h-9 w-full items-center justify-between bg-zinc-700 px-4 text-white",
+              "bg-muted flex h-9 w-full items-center justify-between px-4",
               open ? "rounded-t-md" : "rounded-md"
             )}
           >

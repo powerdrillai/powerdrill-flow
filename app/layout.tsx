@@ -6,6 +6,7 @@ import { Geist_Mono } from "next/font/google";
 
 import { Toaster } from "@/components/ui/sonner";
 import { ApiGuardProvider } from "@/providers/api-guard";
+import { ProgressProvider } from "@/providers/progress-provider";
 import { QueryClientProvider } from "@/providers/query-client";
 import { ThemeProvider } from "@/providers/theme-provider";
 
@@ -30,7 +31,7 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geist_sans.variable} ${geist_mono.variable} antialiased`}
       >
@@ -40,13 +41,15 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
           enableSystem
           disableTransitionOnChange
         >
-          <QueryClientProvider>
-            <ApiGuardProvider>
-              <div className="flex min-h-screen flex-col">
-                <main className="flex flex-1 flex-col">{children}</main>
-              </div>
-            </ApiGuardProvider>
-          </QueryClientProvider>
+          <ProgressProvider>
+            <QueryClientProvider>
+              <ApiGuardProvider>
+                <div className="flex min-h-screen flex-col">
+                  <main className="flex flex-1 flex-col">{children}</main>
+                </div>
+              </ApiGuardProvider>
+            </QueryClientProvider>
+          </ProgressProvider>
         </ThemeProvider>
         <Toaster />
       </body>

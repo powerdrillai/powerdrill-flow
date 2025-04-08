@@ -3,37 +3,38 @@
 import { IconCircleCheckFilled } from "@tabler/icons-react";
 import { Loader2Icon } from "lucide-react";
 
-import { MessageGroup } from "@/hooks/usePowerdrillChat";
-import { cn } from "@/lib/utils";
-
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "../ui/collapsible";
-import { LoadingDots } from "../ui/loading-dots";
-import { TooltipWrapper } from "../ui/tooltip-wrapper";
+} from "@/components/ui/collapsible";
+import { LoadingDots } from "@/components/ui/loading-dots";
+import { TooltipWrapper } from "@/components/ui/tooltip-wrapper";
+import { MessageGroup } from "@/hooks/usePowerdrillChat";
+import { cn } from "@/lib/utils";
+import { AnswerBlock } from "@/services/powerdrill/session.service";
+
 import MessageBlock from "./message-blocks";
 
 interface MessageProps {
   message: MessageGroup;
   isLoading?: boolean;
   isLast?: boolean;
-  onQuestionClick?: (question: string) => void;
+  onBlockPreview?: (block: AnswerBlock) => void;
 }
 
 export default function Message({
   message,
   isLoading,
   isLast,
-  onQuestionClick,
+  onBlockPreview,
 }: MessageProps) {
   const { question, answer, job_id } = message;
   return (
     <div className="space-y-4">
       {/* User question */}
       <div className="flex justify-end">
-        <div className="bg-accent max-w-[80%] rounded-md p-2">
+        <div className="bg-muted max-w-[80%] rounded-md p-2">
           {question.blocks.map((block, index) => (
             <MessageBlock
               key={`${job_id}-question-block-${index}`}
@@ -67,7 +68,7 @@ export default function Message({
                         <MessageBlock
                           key={`${job_id}-answer-block-${index}`}
                           block={block}
-                          onQuestionClick={onQuestionClick}
+                          onBlockPreview={onBlockPreview}
                         />
                       );
                     }
@@ -107,7 +108,7 @@ export default function Message({
                       <MessageBlock
                         key={`${job_id}-answer-block-${index}`}
                         block={block}
-                        onQuestionClick={onQuestionClick}
+                        onBlockPreview={onBlockPreview}
                       />
                     ))}
                   </div>

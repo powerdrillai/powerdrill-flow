@@ -43,11 +43,11 @@ export default function SplitLayout({
         {/* Sidebar Content */}
         <div
           className={cn(
-            `h-full overflow-y-auto`,
+            `h-full overflow-y-auto scroll-smooth`,
             collapsed ? "invisible" : "visible"
           )}
         >
-          <div className="mx-auto h-full max-w-4xl px-6">{sidebarContent}</div>
+          <div className="mx-auto max-w-4xl px-6">{sidebarContent}</div>
         </div>
       </div>
 

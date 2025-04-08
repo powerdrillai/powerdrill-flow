@@ -8,6 +8,7 @@ import ChatInput from "@/components/chat-input";
 import { AppHeader } from "@/components/ui/app-header";
 import { usePowerdrillChat } from "@/hooks/usePowerdrillChat";
 import { useSession } from "@/hooks/useSession";
+import { AnswerBlock } from "@/services/powerdrill/session.service";
 import { useSessionStore } from "@/store/session-store";
 
 import { ChatCanvas } from "./chat-canvas";
@@ -31,19 +32,26 @@ export default function ChatContainer({ sessionId }: ChatContainerProps) {
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const userHasScrolled = useRef(false);
-  const [collapsed, setCollapsed] = useState(true);
   // Add ref to track if sidebar has been auto-opened due to Conclusions
   const hasAutoOpenedSidebarRef = useRef(false);
+  const [collapsed, setCollapsed] = useState(true);
+  const [blockPreview, setBlockPreview] = useState<AnswerBlock>();
 
   // Use PowerdrillChat hook
-  const { messages, handleSubmit, handleInputChange, input, isLoading } =
-    usePowerdrillChat({
-      api: "/api/chat",
-      sessionId,
-      datasetId,
-      datasourceId,
-      initialMessages: history?.records || [],
-    });
+  const {
+    messages,
+    questions,
+    input,
+    isLoading,
+    handleSubmit,
+    handleInputChange,
+  } = usePowerdrillChat({
+    api: "/api/chat",
+    sessionId,
+    datasetId,
+    datasourceId,
+    initialMessages: history?.records || [],
+  });
 
   // Handle auto-scroll
   useEffect(() => {
@@ -141,8 +149,10 @@ export default function ChatContainer({ sessionId }: ChatContainerProps) {
         <div className="mx-auto w-full max-w-4xl">
           <ChatMessages
             messages={messages}
+            questions={questions}
             isLoading={isLoading || isLoadingHistory}
             onQuestionClick={handleQuestionClick}
+            onBlockPreview={setBlockPreview}
           />
         </div>
       </div>
@@ -173,7 +183,12 @@ export default function ChatContainer({ sessionId }: ChatContainerProps) {
         collapsed={collapsed}
         onToggle={handleToggleSidebar}
         sidebarContent={
-          <ChatCanvas messages={messages} isLoading={isLoading} />
+          <ChatCanvas
+            messages={messages}
+            isLoading={isLoading}
+            blockPreview={blockPreview}
+            onClearBlockPreview={() => setBlockPreview(undefined)}
+          />
         }
       >
         {chatContent}
