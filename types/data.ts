@@ -11,6 +11,10 @@ export interface DatasetRecord {
   id: string;
   name: string;
   description: string;
+  summary?: string;
+  exploration_questions?: string[];
+  keywords?: string[];
+  status?: "synched" | "invalid" | "synching";
 }
 
 export interface DatasetListResult {

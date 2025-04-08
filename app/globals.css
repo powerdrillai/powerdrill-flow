@@ -60,6 +60,11 @@
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: hsl(0 0% 100%);
+  --success: hsl(142, 76%, 36%);
+  --success-foreground: hsl(0 0% 100%);
+  --pending: hsl(200, 97%, 63%);
+  --pending-foreground: hsl(0 0% 100%);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
@@ -97,6 +102,10 @@
   --accent-foreground: hsl(233 18% 94%);
   --destructive: hsl(10 90% 57%);
   --destructive-foreground: hsl(0 0% 100%);
+  --success: hsl(142, 76%, 36%);
+  --success-foreground: hsl(0 0% 100%);
+  --pending: hsl(200, 97%, 63%);
+  --pending-foreground: hsl(0 0% 100%);
   --ring: hsl(44 100% 71%);
   --chart-1: oklch(0.55 0.19 260);
   --chart-2: oklch(0.65 0.15 195);
@@ -120,12 +129,13 @@
   body {
     @apply bg-background text-foreground;
     overflow-x: hidden;
+    overflow-y: auto;
   }
   
-  /* Ensure scrollbars appear at the edge */
+  /* Allow vertical scrolling */
   html, body {
-    overflow: hidden;
-    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
     width: 100%;
   }
 }
@@ -162,9 +172,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   min-height: calc(100vh - 48px); /* Subtract header height */
-  padding-bottom: 10vh; /* Move input box upward */
+  padding-top: 120px; /* Fixed spacing from header */
 }
 
 @media (min-height: 800px) {
@@ -175,6 +185,16 @@
 
 @media (max-height: 700px) {
   .home-container {
-    padding-bottom: 5vh;
+    padding-top: 80px; /* Smaller fixed spacing on smaller screens */
   }
+}
+
+/* Custom truncated text with ellipsis */
+.summary-truncate {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
 }
