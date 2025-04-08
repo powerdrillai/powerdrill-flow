@@ -57,7 +57,7 @@ export default function Message({
                     ) : (
                       <IconCircleCheckFilled className="size-4 shrink-0" />
                     )}
-                    <div className="min-w-0 flex-1 truncate text-left font-medium">
+                    <div className="min-w-0 flex-1 truncate text-left text-base font-medium">
                       {item.group_name}
                     </div>
                   </div>
@@ -90,7 +90,7 @@ export default function Message({
                       <IconCircleCheckFilled className="size-4 shrink-0" />
                     )}
                     <TooltipWrapper title={item.group_name}>
-                      <div className="text-primary min-w-0 flex-1 truncate text-left font-medium">
+                      <div className="text-primary min-w-0 flex-1 truncate text-left text-base font-medium">
                         {item.group_name}
                       </div>
                     </TooltipWrapper>
@@ -99,7 +99,7 @@ export default function Message({
                 <CollapsibleContent>
                   <div
                     className={cn(
-                      "ml-2 space-y-2 border-l border-dashed px-4 py-2",
+                      "ml-2 space-y-3 border-l border-dashed px-4 py-2",
                       answerIndex === answer.length - 1 && "border-none"
                     )}
                   >

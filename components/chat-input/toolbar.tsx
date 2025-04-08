@@ -20,20 +20,21 @@ export function Toolbar({
   sessionId,
 }: ToolbarProps) {
   return (
-    <div className="flex items-center justify-end px-4 pb-3">
-      <div className="flex items-center gap-2">
+    <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3">
+      <div className="flex-grow"></div>
+      <div className="flex items-center gap-3">
         <FileSelector disabled={isLoading} sessionId={sessionId} />
         <Separator orientation="vertical" className="h-8" />
         <Button
           type="button"
           onClick={onSubmit}
-          className="size-8 rounded-full"
+          className="bg-primary hover:bg-primary/90 size-10 rounded-full transition-colors"
           disabled={!hasInput || isLoading}
         >
           {isLoading ? (
-            <Loader2Icon className="size-4 animate-spin text-white" />
+            <Loader2Icon className="size-5 animate-spin text-white" />
           ) : (
-            <ArrowUpIcon className="size-4 text-white" />
+            <ArrowUpIcon className="size-5 text-white" />
           )}
         </Button>
       </div>

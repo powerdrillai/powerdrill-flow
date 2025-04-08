@@ -704,6 +704,9 @@ export function usePowerdrillChat({
             session_id: sessionId,
             dataset_id: datasetId,
             datasource_ids: datasourceId,
+            custom_options: {
+              with_citation: false,
+            },
           }),
           signal: abortControllerRef.current.signal,
 

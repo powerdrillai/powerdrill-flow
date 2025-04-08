@@ -142,7 +142,7 @@ export default function ChatContainer({ sessionId }: ChatContainerProps) {
           onQuestionClick={handleQuestionClick}
         />
       </div>
-      <div className="mx-auto mt-4 w-full max-w-4xl">
+      <div className="mx-auto mt-6 mb-4 w-full max-w-4xl">
         <ChatInput
           input={input}
           onInputChange={handleInputChange}

@@ -31,19 +31,19 @@ export function ImageBlockComponent({ block }: ImageBlockProps) {
 
   if (!imageUrl) {
     return (
-      <div className="relative w-full max-w-[67%] overflow-hidden">
-        <Skeleton className="h-[300px] w-[400px]" />
+      <div className="relative w-full max-w-[100%] overflow-hidden">
+        <Skeleton className="h-[900px] w-[1200px]" />
       </div>
     );
   }
 
   return (
-    <div className="relative w-full max-w-[67%] overflow-hidden">
+    <div className="relative w-full max-w-[100%] overflow-hidden">
       <Image
         src={imageUrl || ""}
         alt={block.content.name || "chart image"}
-        width={400}
-        height={300}
+        width={1200}
+        height={900}
         className="object-contain"
       />
     </div>

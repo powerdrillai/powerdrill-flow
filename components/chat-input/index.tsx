@@ -52,7 +52,7 @@ export default function ChatInput({
   };
 
   return (
-    <div className="flex w-full flex-col rounded-lg border">
+    <div className="mx-auto flex w-full max-w-[95%] flex-col rounded-xl border bg-white shadow-sm">
       {/* Dataset display row */}
       <DatasetInfo
         dataset={session?.selectedDataset}
@@ -66,12 +66,14 @@ export default function ChatInput({
       />
 
       {/* Input field row */}
-      <MessageInput
-        value={input || ""}
-        onChange={onInputChange}
-        onKeyDown={handleKeyDown}
-        isLoading={isLoading}
-      />
+      <div className="px-4 pt-2">
+        <MessageInput
+          value={input || ""}
+          onChange={onInputChange}
+          onKeyDown={handleKeyDown}
+          isLoading={isLoading}
+        />
+      </div>
 
       {/* Toolbar row */}
       <Toolbar

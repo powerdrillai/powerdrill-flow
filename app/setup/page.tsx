@@ -74,9 +74,11 @@ export default function UserSetup() {
         <div className="flex flex-col gap-6">
           <Card className="min-w-md">
             <CardHeader>
-              <CardTitle className="text-2xl">API Credentials Setup</CardTitle>
+              <CardTitle className="text-2xl">
+                Start Your Powerdrill Journey
+              </CardTitle>
               <CardDescription>
-                Enter your PowerDrill API credentials to continue
+                Enter your Powerdrill API credentials to continue
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -118,7 +120,7 @@ export default function UserSetup() {
                 </div>
                 <div className="mt-4 text-center text-sm">
                   <a
-                    href="https://docs.powerdrill.ai/developer-guides/create-subscription"
+                    href="https://docs.powerdrill.ai/enterprise/quick-start"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="underline underline-offset-4"

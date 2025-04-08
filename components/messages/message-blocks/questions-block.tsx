@@ -16,7 +16,7 @@ export function QuestionsBlockComponent({
 }: QuestionsBlockProps) {
   return (
     <div className="space-y-2">
-      <h4 className="text-sm font-medium">More Questions</h4>
+      <h4 className="text-base font-medium">More Questions</h4>
       <div className="space-y-2">
         {block.content.map((question: string, index: number) => (
           <Button
@@ -26,8 +26,9 @@ export function QuestionsBlockComponent({
             size="sm"
             disabled={!isLast}
             onClick={() => onQuestionClick?.(question)}
+            className="justify-start"
           >
-            <div className="h-fit w-full py-2 text-sm font-normal !whitespace-normal">
+            <div className="h-fit w-full py-2 text-left text-base font-normal !whitespace-normal">
               {question}
             </div>
           </Button>
