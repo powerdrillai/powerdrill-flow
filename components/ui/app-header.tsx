@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { Home, LogOut, PlusIcon } from "lucide-react";
+import { Github, Home, LogOut, PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -88,6 +88,18 @@ export function AppHeader({ title, sessionId, onNewSession }: AppHeaderProps) {
             </Button>
           </TooltipWrapper>
         )}
+        <TooltipWrapper title="Open Source on GitHub">
+          <Button variant="ghost" size="icon" className="h-8 w-8 p-0" asChild>
+            <a
+              href="https://github.com/powerdrillai/powerdrill-flow"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Github className="h-4 w-4" />
+              <span className="sr-only">GitHub</span>
+            </a>
+          </Button>
+        </TooltipWrapper>
         <TooltipWrapper title="Home">
           <Button variant="ghost" size="icon" className="h-8 w-8 p-0" asChild>
             <Link href="/">

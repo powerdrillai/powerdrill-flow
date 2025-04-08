@@ -301,7 +301,7 @@ export default function FileTree({ onSelect }: FileTreeProps) {
       {datasetsData?.map((dataset) => (
         <AccordionItem key={dataset.id} value={dataset.id} className="border-0">
           <div className="flex items-center gap-2 rounded-md px-2">
-            {/* 展开/收起按钮 */}
+            {/* Expand/Collapse button */}
             <Button
               onClick={(e) => handleDatasetExpand(dataset.id, e)}
               variant="ghost"
@@ -315,7 +315,7 @@ export default function FileTree({ onSelect }: FileTreeProps) {
               )}
             </Button>
 
-            {/* 数据集复选框 */}
+            {/* Dataset checkbox */}
             <Checkbox
               checked={isDatasetFullySelected(dataset.id)}
               className={cn(
@@ -326,7 +326,7 @@ export default function FileTree({ onSelect }: FileTreeProps) {
               onClick={(e) => e.stopPropagation()}
             />
 
-            {/* 数据集标题 */}
+            {/* Dataset title */}
             <div
               className="flex flex-1 cursor-pointer items-center gap-2 text-sm font-medium"
               onClick={() => handleDatasetSelect(dataset.id)}

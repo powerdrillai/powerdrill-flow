@@ -2,6 +2,7 @@
 
 import { Label } from "@radix-ui/react-label";
 import { useMutation } from "@tanstack/react-query";
+import { Github } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -21,17 +22,30 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { TooltipWrapper } from "@/components/ui/tooltip-wrapper";
 
 type FormValues = {
   userId: string;
   apiKey: string;
 };
 
-// 简化版顶部导航栏，仅包含主题切换
+// Simplified header with theme toggle and GitHub link
 function SimpleHeader() {
   return (
     <div className="bg-background/60 sticky top-0 z-10 flex h-12 items-center justify-end overflow-hidden px-4 shadow-sm backdrop-blur">
-      <div className="flex items-center">
+      <div className="flex items-center gap-1">
+        <TooltipWrapper title="Open Source on GitHub">
+          <Button variant="ghost" size="icon" className="h-8 w-8 p-0" asChild>
+            <a
+              href="https://github.com/powerdrillai/powerdrill-flow"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Github className="h-4 w-4" />
+              <span className="sr-only">GitHub</span>
+            </a>
+          </Button>
+        </TooltipWrapper>
         <ThemeToggle />
       </div>
     </div>

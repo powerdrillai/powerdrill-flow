@@ -312,7 +312,7 @@ export function usePowerdrillChat({
   onFinish,
   onError,
 }: PowerdrillChatOptions) {
-  // 状态与引用
+  // State and references
   const [messages, setMessages] = useState<MessageGroup[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -757,7 +757,7 @@ export function usePowerdrillChat({
         });
       } catch (error: unknown) {
         if ((error as { name?: string }).name !== "AbortError") {
-          console.error("提交消息错误:", error);
+          console.error("Error submitting message:", error);
           setError(error as Error);
           if (onError) {
             onError(error as Error);
