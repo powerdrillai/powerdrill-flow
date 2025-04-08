@@ -2,6 +2,8 @@
 
 import { cookies } from "next/headers";
 
+import { decryptData, encryptData } from "./cookie-encryption";
+
 // API Credentials Type
 interface ApiCredentials {
   userId: string;
@@ -13,7 +15,7 @@ export async function setApiCredentials(userId: string, apiKey: string) {
   const cookieStore = await cookies();
 
   // Set user ID with 7-day expiry and security options enabled
-  cookieStore.set("api_user_id", userId, {
+  cookieStore.set("api_user_id", encryptData(userId), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     maxAge: 60 * 60 * 24 * 7, // 7 days
@@ -22,7 +24,7 @@ export async function setApiCredentials(userId: string, apiKey: string) {
   });
 
   // Set API key with 1-day expiry and security options enabled
-  cookieStore.set("api_key", apiKey, {
+  cookieStore.set("api_key", encryptData(apiKey), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     maxAge: 60 * 60 * 24, // 1 day
@@ -43,8 +45,8 @@ export async function getApiCredentials(): Promise<ApiCredentials | null> {
   }
 
   return {
-    userId: userId.value,
-    apiKey: apiKey.value,
+    userId: decryptData(userId.value),
+    apiKey: decryptData(apiKey.value),
   };
 }
 
