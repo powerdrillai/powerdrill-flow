@@ -1,6 +1,6 @@
 "use client";
 
-import { IconDeviceDesktop, IconMoon, IconSun } from "@tabler/icons-react";
+import { IconMoon, IconSun } from "@tabler/icons-react";
 import { useTheme } from "next-themes";
 import * as React from "react";
 
@@ -51,10 +51,6 @@ export function ThemeToggle() {
         <DropdownMenuItem onClick={() => setTheme("dark")} className="gap-3">
           <IconMoon className="h-4 w-4 text-blue-300" />
           <span>Dark</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")} className="gap-3">
-          <IconDeviceDesktop className="h-4 w-4 text-green-400" />
-          <span>System</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

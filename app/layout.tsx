@@ -37,8 +37,7 @@ export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="dark"
           disableTransitionOnChange
         >
           <ProgressProvider>
