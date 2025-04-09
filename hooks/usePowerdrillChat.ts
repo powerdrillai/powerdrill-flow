@@ -554,6 +554,16 @@ export function usePowerdrillChat({
         // Extract message if available
         if ("message" in errorData && typeof errorData.message === "string") {
           errorMessage = errorData.message;
+        } else if (
+          "content" in errorData &&
+          typeof errorData.content === "object" &&
+          errorData.content !== null
+        ) {
+          // Check for nested content object with code property
+          const content = errorData.content as { code?: string };
+          if (content.code) {
+            errorMessage = content.code;
+          }
         }
       } else if (typeof errorData === "string") {
         // If it's just a string message
@@ -657,10 +667,22 @@ export function usePowerdrillChat({
           break;
         case "END_MARK":
           // Check if END_MARK contains error information
-          if (typeof content === "string" && content === "[ERROR]") {
-            console.warn("Received END_MARK with [ERROR] data");
-            // No specific error details in this case, show generic error
-            handleErrorMessage("An error occurred during processing");
+          if (typeof content === "string") {
+            if (content === "[ERROR]") {
+              console.warn("Received END_MARK with [ERROR] data");
+              // No specific error details in this case, show generic error
+              appToast.error("Processing Error", {
+                description: "An error occurred during processing",
+                duration: 5000,
+              });
+            } else if (content.includes("ERROR")) {
+              // Try to extract any error message in the content
+              console.warn("Received END_MARK with error content:", content);
+              appToast.error("Processing Error", {
+                description: content,
+                duration: 5000,
+              });
+            }
           }
           break;
         // case "SOURCES":
@@ -706,6 +728,48 @@ export function usePowerdrillChat({
       if (eventType === "ERROR") {
         try {
           const errorData = JSON.parse(event.data);
+
+          // Handle specific error format with choices array
+          if (
+            errorData.choices &&
+            Array.isArray(errorData.choices) &&
+            errorData.choices[0]?.delta?.content
+          ) {
+            const contentObj = errorData.choices[0].delta.content;
+
+            // Extract error message from content object
+            if (
+              typeof contentObj === "object" &&
+              contentObj !== null &&
+              "code" in contentObj
+            ) {
+              const errorMessage = contentObj.code;
+
+              // Show error message in toast
+              if (
+                typeof errorMessage === "string" &&
+                errorMessage.toLowerCase().includes("quota")
+              ) {
+                appToast.quotaExceeded(errorMessage);
+              } else {
+                appToast.error("Processing Error", {
+                  description: errorMessage,
+                  duration: 5000,
+                });
+              }
+
+              setError(
+                new Error(
+                  typeof errorMessage === "string"
+                    ? errorMessage
+                    : "Error processing request"
+                )
+              );
+              return;
+            }
+          }
+
+          // Fall back to default error handling
           handleErrorMessage(errorData);
         } catch (parseError) {
           console.error("Failed to parse ERROR event data:", parseError, event);
