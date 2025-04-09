@@ -8,8 +8,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { Ellipsis } from "@/components/ui/ellipsis";
 import { LoadingDots } from "@/components/ui/loading-dots";
-import { TooltipWrapper } from "@/components/ui/tooltip-wrapper";
 import { MessageGroup } from "@/hooks/usePowerdrillChat";
 import { cn } from "@/lib/utils";
 import { AnswerBlock } from "@/services/powerdrill/session.service";
@@ -90,11 +90,9 @@ export default function Message({
                     ) : (
                       <IconCircleCheckFilled className="size-4 shrink-0" />
                     )}
-                    <TooltipWrapper title={item.group_name}>
-                      <div className="text-primary min-w-0 flex-1 truncate text-left text-base font-medium">
-                        {item.group_name}
-                      </div>
-                    </TooltipWrapper>
+                    <Ellipsis className="text-primary min-w-0 flex-1 truncate text-left text-base font-medium">
+                      {item.group_name}
+                    </Ellipsis>
                   </div>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
