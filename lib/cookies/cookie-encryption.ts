@@ -1,12 +1,13 @@
 import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
 
-// 使用环境变量存储加密密钥，如果未设置则生成一个固定的密钥
+// Use environment variable to store encryption key, or use a fixed key if not set
 // For AES-256-GCM, we need a 32-byte key (64 hex characters)
 const ENCRYPTION_KEY =
-  process.env.COOKIE_ENCRYPTION_KEY || "d4c74594d841139328695756648b6bd6d4c74594d841139328695756648b6bd6";
+  process.env.COOKIE_ENCRYPTION_KEY ||
+  "d4c74594d841139328695756648b6bd6d4c74594d841139328695756648b6bd6";
 const ALGORITHM = "aes-256-gcm";
 
-// 加密数据
+// Encrypt data
 export function encryptData(data: string): string {
   const iv = randomBytes(12);
   const cipher = createCipheriv(
@@ -20,11 +21,11 @@ export function encryptData(data: string): string {
 
   const authTag = cipher.getAuthTag();
 
-  // 将IV和认证标签与加密数据一起存储
+  // Store IV and authentication tag along with the encrypted data
   return `${iv.toString("hex")}:${authTag.toString("hex")}:${encryptedData}`;
 }
 
-// 解密数据
+// Decrypt data
 export function decryptData(encryptedValue: string): string {
   try {
     const [ivHex, authTagHex, encryptedData] = encryptedValue.split(":");

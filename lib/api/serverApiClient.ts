@@ -90,13 +90,13 @@ export async function serverFetchData<T>(endpoint: string): Promise<T> {
         const errorText = await response.text();
         console.error(`Error response: ${errorText}`);
       } catch (e) {
-        console.error('Could not read error response body');
+        console.error("Could not read error response body" + e);
       }
     }
 
     return await handleApiResponse<T>(response);
   } catch (error) {
-    console.error('Error in serverFetchData:', error);
+    console.error("Error in serverFetchData:", error);
     throw handleError(error);
   }
 }
@@ -156,7 +156,7 @@ function handleError(error: unknown): PowerdrillApiError {
       `Authentication failed (${apiError.httpStatus}), please check your User ID and API Key. Error: ${apiError.getFormattedMessage()}`
     );
     if (apiError.details) {
-      console.error('Error details:', apiError.details);
+      console.error("Error details:", apiError.details);
     }
   } else if (apiError.httpStatus === 429) {
     // Rate limit exceeded
@@ -164,7 +164,7 @@ function handleError(error: unknown): PowerdrillApiError {
   } else {
     console.error("API request error:", apiError.getFormattedMessage());
     if (apiError.details) {
-      console.error('Error details:', apiError.details);
+      console.error("Error details:", apiError.details);
     }
   }
 
