@@ -2,6 +2,8 @@ import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
+import { ClientErrorCode } from "@/lib/api/errors";
+import { appToast } from "@/lib/toast";
 import {
   CodeBlock,
   ImageBlock,
@@ -557,6 +559,61 @@ export function usePowerdrillChat({
     []
   );
 
+  // Handle error messages from stream
+  const handleErrorMessage = useCallback((errorData: unknown) => {
+    console.error("PowerDrill API Error:", errorData);
+
+    // Extract error message
+    let errorMessage = "An error occurred during processing";
+    let errorCode: number | undefined;
+
+    try {
+      if (errorData && typeof errorData === "object") {
+        // Try to extract error code and message
+        if ("code" in errorData && typeof errorData.code === "string") {
+          errorCode = parseInt(errorData.code, 10);
+        } else if ("code" in errorData && typeof errorData.code === "number") {
+          errorCode = errorData.code;
+        }
+
+        // Extract message if available
+        if ("message" in errorData && typeof errorData.message === "string") {
+          errorMessage = errorData.message;
+        }
+      } else if (typeof errorData === "string") {
+        // If it's just a string message
+        errorMessage = errorData;
+      }
+    } catch (e) {
+      console.error("Error parsing error data:", e);
+    }
+
+    // Special handling for specific error types
+    if (
+      errorCode === ClientErrorCode.JOB_QUOTA_EXCEEDED ||
+      errorMessage.toLowerCase().includes("quota") ||
+      errorMessage.toLowerCase().includes("exceeded")
+    ) {
+      // Show quota exceeded message with subscription link
+      appToast.quotaExceeded(errorMessage);
+    } else if (
+      errorMessage.toLowerCase().includes("workspace capacity") ||
+      errorMessage.toLowerCase().includes("insufficient storage")
+    ) {
+      // Show workspace capacity error
+      appToast.workspaceCapacity(errorMessage);
+    } else {
+      // Generic error message
+      appToast.error("Processing Error", {
+        description: errorMessage,
+        duration: 5000,
+      });
+    }
+
+    // Set error state
+    setError(new Error(errorMessage));
+  }, []);
+
   // Process different types of event data
   const processEventData = useCallback(
     (eventType: PowerdrillEventType, data: EventData) => {
@@ -623,13 +680,26 @@ export function usePowerdrillChat({
         case "QUESTIONS":
           setQuestions(content as string[]);
           break;
+        case "END_MARK":
+          // Check if END_MARK contains error information
+          if (typeof content === "string" && content === "[ERROR]") {
+            console.warn("Received END_MARK with [ERROR] data");
+            // No specific error details in this case, show generic error
+            handleErrorMessage("An error occurred during processing");
+          }
+          break;
         // case "SOURCES":
       }
 
       // Update UI
       updateUIWithCurrentBlocks();
     },
-    [updateUIWithCurrentBlocks, updateTextualBlock, addDirectBlock]
+    [
+      updateUIWithCurrentBlocks,
+      updateTextualBlock,
+      addDirectBlock,
+      handleErrorMessage,
+    ]
   );
 
   // Handle events received from stream
@@ -641,11 +711,32 @@ export function usePowerdrillChat({
         return;
       }
 
+      // Handle special [ERROR] end marker
+      if (event.data === "[ERROR]") {
+        console.error("Received [ERROR] end marker");
+        // Finish processing but mark as error
+        finishMessageProcessing(messageToSend);
+        return;
+      }
+
       // Get event type
       const eventType = event.event as PowerdrillEventType;
 
       // Ignore JOB_ID event
       if (eventType === "JOB_ID") {
+        return;
+      }
+
+      // Handle ERROR event
+      if (eventType === "ERROR") {
+        try {
+          const errorData = JSON.parse(event.data);
+          handleErrorMessage(errorData);
+        } catch (parseError) {
+          console.error("Failed to parse ERROR event data:", parseError, event);
+          // Still try to show some error message
+          handleErrorMessage(event.data);
+        }
         return;
       }
 
@@ -661,7 +752,7 @@ export function usePowerdrillChat({
         );
       }
     },
-    [processEventData, finishMessageProcessing]
+    [processEventData, finishMessageProcessing, handleErrorMessage]
   );
 
   // Submit message

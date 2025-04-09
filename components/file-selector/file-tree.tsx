@@ -102,7 +102,7 @@ export default function FileTree({ onSelect }: FileTreeProps) {
     if (hasChanges) {
       setDatasetSourcesMap(newMap);
     }
-  }, [datasourceQueries, expandedDatasets]);
+  }, [datasourceQueries, expandedDatasets, datasetSourcesMap]);
 
   // Create a mapping for easy access to query results by datasetId
   const datasourceQueriesMap: Record<

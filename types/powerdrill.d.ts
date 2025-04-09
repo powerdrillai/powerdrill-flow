@@ -11,7 +11,8 @@ export type PowerdrillEventType =
   | "QUESTIONS"
   | "TRIGGER"
   | "SOURCES"
-  | "END_MARK";
+  | "END_MARK"
+  | "ERROR";
 
 // PowerDrill Task Status
 export type PowerdrillTaskStatus = "running" | "done" | "error";

@@ -2,13 +2,12 @@
 
 import { Label } from "@radix-ui/react-label";
 import { useMutation } from "@tanstack/react-query";
-import { Github } from "lucide-react";
+import { GithubIcon, KeyRound, ShieldCheck } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import React from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 
 import { submitApiCredentials } from "@/app/actions";
 import { Button } from "@/components/ui/button";
@@ -23,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { TooltipWrapper } from "@/components/ui/tooltip-wrapper";
+import { appToast } from "@/lib/toast";
 
 type FormValues = {
   userId: string;
@@ -41,7 +41,7 @@ function SimpleHeader() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Github className="h-4 w-4" />
+              <GithubIcon className="h-4 w-4" />
               <span className="sr-only">GitHub</span>
             </a>
           </Button>
@@ -84,16 +84,22 @@ export default function UserSetup() {
       return res;
     },
     onSuccess: (data) => {
-      toast.success("API Credentials saved.");
+      appToast.success("API Credentials Saved", {
+        description:
+          "Your API credentials have been verified and saved successfully.",
+        icon: <ShieldCheck className="size-5" />,
+      });
       if (data.success) {
         router.replace("/");
       }
     },
     onError: (error) => {
-      toast.error(
-        error.message ||
-          "API credentials verification failed, please check your input"
-      );
+      appToast.error("Verification Failed", {
+        description:
+          error.message ||
+          "API credentials verification failed, please check your input",
+        icon: <KeyRound className="size-5" />,
+      });
     },
   });
 

@@ -1,7 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { PaperclipIcon, UploadIcon } from "lucide-react";
+import { FileIcon, PaperclipIcon, UploadIcon } from "lucide-react";
 import { useRef, useState } from "react";
-import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
 
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useMultipartUpload } from "@/hooks/useMultipartUpload";
+import { appToast } from "@/lib/toast";
 import { createDataset } from "@/services/powerdrill/dataset.service";
 import {
   createDataSource,
@@ -122,8 +122,9 @@ export function FileSelector({ disabled, sessionId }: FileSelectorProps) {
     if (!files || files.length === 0) return;
 
     if (files.length > MAX_FILES) {
-      toast("File count exceeds limit", {
-        description: `Maximum ${MAX_FILES} files can be selected`,
+      appToast.warning("File Count Limit Exceeded", {
+        description: `Maximum ${MAX_FILES} files can be selected at once.`,
+        icon: <FileIcon className="size-5" />,
       });
       return;
     }
@@ -145,15 +146,17 @@ export function FileSelector({ disabled, sessionId }: FileSelectorProps) {
 
     // If there are any unsupported file types, abort the upload
     if (invalidFiles.length > 0) {
-      toast("Unsupported file type", {
+      appToast.error("Unsupported File Type", {
         description: `The following files are not supported: ${invalidFiles.join(", ")}`,
+        icon: <FileIcon className="size-5" />,
       });
       return;
     }
 
     if (validFiles.length === 0) {
-      toast("No valid files", {
-        description: "Please select supported file types",
+      appToast.warning("No Valid Files", {
+        description: `Please select supported file types: ${SUPPORTED_FILE_TYPES.join(", ")}`,
+        icon: <FileIcon className="size-5" />,
       });
       return;
     }
@@ -246,15 +249,31 @@ export function FileSelector({ disabled, sessionId }: FileSelectorProps) {
       // Start polling data source status
       setPollingDatasetId(createdDatasetId);
 
-      toast("File uploaded successfully", {
-        description:
-          "Dataset and data source created successfully, syncing data...",
+      // Files uploaded successfully
+
+      appToast.success("Files Uploaded Successfully", {
+        description: `Dataset and data sources created successfully. Syncing data...`,
+        icon: <FileIcon className="size-5" />,
+        duration: 5000,
       });
     } catch (error) {
       console.error("Failed to upload file:", error);
-      toast("Upload failed", {
-        description: error instanceof Error ? error.message : "Unknown error",
-      });
+
+      // Check if it's a workspace capacity error
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+
+      if (
+        errorMessage.toLowerCase().includes("insufficient storage") ||
+        errorMessage.toLowerCase().includes("workspace capacity")
+      ) {
+        appToast.workspaceCapacity(errorMessage);
+      } else {
+        appToast.uploadError(
+          validFiles.length > 1 ? "files" : validFiles[0]?.name || "file",
+          errorMessage
+        );
+      }
     } finally {
       setIsUploading(false);
       // Clear file input to allow selecting the same file again

@@ -4,13 +4,13 @@ import { useMutation } from "@tanstack/react-query";
 import { Github, Home, LogOut, PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 import { logoutApiCredentials } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { TooltipWrapper } from "@/components/ui/tooltip-wrapper";
 import { useSession } from "@/hooks/useSession";
+import { appToast } from "@/lib/toast";
 
 interface AppHeaderProps {
   title?: string;
@@ -36,11 +36,15 @@ export function AppHeader({ title, sessionId, onNewSession }: AppHeaderProps) {
       return res;
     },
     onSuccess: () => {
-      toast.success("Logged out successfully");
+      appToast.success("Logged Out Successfully", {
+        description: "You have been logged out of your account.",
+      });
       router.push("/setup");
     },
     onError: () => {
-      toast.error("Failed to logout");
+      appToast.error("Logout Failed", {
+        description: "There was a problem logging you out. Please try again.",
+      });
     },
   });
 
@@ -64,7 +68,9 @@ export function AppHeader({ title, sessionId, onNewSession }: AppHeaderProps) {
       // Redirect to chat page
       router.push(`/chat/${sessionId}`);
     } catch (_error) {
-      toast.error("Failed to create session, please try again");
+      appToast.error("Session Creation Failed", {
+        description: "Failed to create a new session. Please try again.",
+      });
     }
   };
 
