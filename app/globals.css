@@ -44,30 +44,30 @@
 }
 
 :root {
-  --background: oklch(0.99 0.01 60);
-  --foreground: oklch(0.1 0.01 60);
-  --muted: oklch(0.91 0.02 60);
-  --muted-foreground: oklch(0.4 0.02 60);
-  --popover: oklch(0.99 0.01 60);
-  --popover-foreground: oklch(0.1 0.01 60);
-  --card: oklch(0.99 0.01 60);
-  --card-foreground: oklch(0.1 0.01 60);
-  --border: oklch(0.94 0.01 60);
-  --input: oklch(0.94 0.01 60);
-  --primary: oklch(0.65 0.2 60);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.91 0.03 60);
-  --secondary-foreground: oklch(0.4 0.03 60);
-  --accent: oklch(0.86 0.05 60);
-  --accent-foreground: oklch(0.35 0.05 60);
-  --destructive: oklch(0.45 0.25 30);
-  --destructive-foreground: oklch(0.9 0.1 30);
-  --ring: oklch(0.65 0.2 60);
-  --chart-1: oklch(0.65 0.2 60);
-  --chart-2: oklch(0.91 0.03 60);
-  --chart-3: oklch(0.86 0.05 60);
-  --chart-4: oklch(0.94 0.02 60);
-  --chart-5: oklch(0.65 0.2 60);
+  --background: oklch(0.98 0.01 253);
+  --foreground: oklch(0.1 0.01 253);
+  --muted: oklch(0.87 0.01 253);
+  --muted-foreground: oklch(0.37 0.03 253);
+  --popover: oklch(0.98 0.01 253);
+  --popover-foreground: oklch(0.1 0.01 253);
+  --card: oklch(0.97 0.01 253);
+  --card-foreground: oklch(0.1 0 0);
+  --border: oklch(0.91 0.02 220);
+  --input: oklch(0.91 0.02 220);
+  --primary: oklch(0.58 0.2 253);
+  --primary-foreground: oklch(0.98 0.01 253);
+  --secondary: oklch(0.89 0.01 253);
+  --secondary-foreground: oklch(0.29 0.02 253);
+  --accent: oklch(0.82 0.02 253);
+  --accent-foreground: oklch(0.22 0.03 253);
+  --destructive: oklch(0.51 0.25 339.2);
+  --destructive-foreground: oklch(1 0 0);
+  --ring: oklch(0.58 0.2 253);
+  --chart-1: oklch(0.58 0.2 253);
+  --chart-2: oklch(0.89 0.01 253);
+  --chart-3: oklch(0.82 0.02 253);
+  --chart-4: oklch(0.92 0.01 253);
+  --chart-5: oklch(0.58 0.21 253);
   --radius: 0.5rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
@@ -146,20 +146,20 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: 15vh;
+  padding-top: calc(15vh + 48px); /* Add header height */
   padding-bottom: 0;
 }
 
 @media (min-height: 800px) {
   .auth-container {
-    padding-top: 20vh;
+    padding-top: calc(20vh + 48px); /* Add header height */
     padding-bottom: 0;
   }
 }
 
 @media (max-height: 700px) {
   .auth-container {
-    padding-top: 10vh;
+    padding-top: calc(10vh + 48px); /* Add header height */
   }
 }
 
@@ -169,8 +169,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  min-height: calc(100vh - 48px); /* Subtract header height */
-  padding-top: 120px; /* Fixed spacing from header */
+  min-height: 100vh;
+  padding-top: 100px; /* Space for fixed header (48px) plus more padding for visual harmony */
 }
 
 @media (min-height: 800px) {
@@ -181,7 +181,7 @@
 
 @media (max-height: 700px) {
   .home-container {
-    padding-top: 80px; /* Smaller fixed spacing on smaller screens */
+    padding-top: 90px; /* Adjusted spacing for smaller screens while maintaining visual harmony */
   }
 }
 

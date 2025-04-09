@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { DatasetCard } from "@/components/dataset-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDatasets } from "@/hooks/useDatasets";
+import { listDataSources } from "@/services/powerdrill/datasource.service";
 import { useSessionStore } from "@/store/session-store";
 import { DatasetRecord } from "@/types/data";
 
@@ -12,20 +13,50 @@ export function DatasetList({ sessionId = "home" }: { sessionId?: string }) {
   const { datasets, isLoading } = useDatasets();
   const { setDataset } = useSessionStore();
 
-  const handleSelectDataset = (dataset: DatasetRecord) => {
-    // Set the selected dataset in the session store
-    setDataset(sessionId, {
-      id: dataset.id,
-      name: dataset.name,
-      description: dataset.description,
-      summary: dataset.summary,
-      exploration_questions: dataset.exploration_questions,
-      keywords: dataset.keywords,
-      datasource: [],
-    });
+  const handleSelectDataset = async (dataset: DatasetRecord) => {
+    try {
+      // First set the dataset with empty datasource to show immediate feedback
+      setDataset(sessionId, {
+        id: dataset.id,
+        name: dataset.name,
+        description: dataset.description,
+        summary: dataset.summary,
+        exploration_questions: dataset.exploration_questions,
+        keywords: dataset.keywords,
+        datasource: [],
+      });
 
-    // Notify the user that the dataset was selected
-    toast.success(`Dataset ${dataset.name} selected`);
+      // Notify the user that the dataset was selected
+      toast.success(`Dataset ${dataset.name} selected`);
+
+      // Fetch data sources for the selected dataset
+      const result = await listDataSources(dataset.id, { page_size: 100 });
+
+      // Update the dataset with the fetched data sources
+      if (result && result.records) {
+        setDataset(sessionId, {
+          id: dataset.id,
+          name: dataset.name,
+          description: dataset.description,
+          summary: dataset.summary,
+          exploration_questions: dataset.exploration_questions,
+          keywords: dataset.keywords,
+          datasource: result.records.map((source) => ({
+            ...source,
+            dataset_id: dataset.id,
+          })),
+        });
+
+        // Scroll to top after data sources are loaded
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to fetch data sources:", error);
+      // The dataset is already selected, so we don't need to show an error toast
+    }
   };
 
   if (isLoading) {

@@ -67,7 +67,7 @@ export default function Home() {
     <>
       <AppHeader />
       <div className="home-container min-h-0">
-        <h6 className="mb-6 text-2xl font-bold">
+        <h6 className="mt-8 mb-6 text-2xl font-bold">
           What do you want to analyze today?
         </h6>
         <div className="mx-auto w-full max-w-3xl min-w-xl">

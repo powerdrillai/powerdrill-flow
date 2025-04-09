@@ -18,7 +18,7 @@ export default function SessionHeader({
   onNewSession,
 }: SessionHeaderProps) {
   return (
-    <div className="bg-background supports-[backdrop-filter]:bg-background/60 flex items-center justify-between gap-2 border-b px-2 py-2 shadow-sm">
+    <div className="bg-background supports-[backdrop-filter]:bg-background/60 fixed top-0 right-0 left-0 z-50 flex h-12 items-center justify-between gap-2 border-b px-2 py-2 shadow-sm backdrop-blur">
       <div className="mx-auto flex w-full max-w-4xl items-center justify-between">
         <h4 className="text-lg font-semibold">
           {session?.name || "Unnamed Session"}

@@ -153,7 +153,7 @@ function handleError(error: unknown): PowerdrillApiError {
   if (apiError.httpStatus === 401 || apiError.httpStatus === 403) {
     // Authentication error handling
     console.error(
-      `Authentication failed (${apiError.httpStatus}), please check your User ID and API Key. Error: ${apiError.getFormattedMessage()}`
+      `Authentication failed (${apiError.httpStatus}), please check your User ID and Project API Key. Error: ${apiError.getFormattedMessage()}`
     );
     if (apiError.details) {
       console.error("Error details:", apiError.details);

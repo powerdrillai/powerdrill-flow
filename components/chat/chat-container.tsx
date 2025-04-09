@@ -37,6 +37,15 @@ export default function ChatContainer({ sessionId }: ChatContainerProps) {
   const [collapsed, setCollapsed] = useState(true);
   const [blockPreview, setBlockPreview] = useState<AnswerBlock>();
 
+  // Handle block preview and ensure sidebar is open
+  const handleBlockPreview = (block: AnswerBlock) => {
+    setBlockPreview(block);
+    // If sidebar is collapsed, open it
+    if (collapsed) {
+      setCollapsed(false);
+    }
+  };
+
   // Use PowerdrillChat hook
   const {
     messages,
@@ -152,7 +161,7 @@ export default function ChatContainer({ sessionId }: ChatContainerProps) {
             questions={questions}
             isLoading={isLoading || isLoadingHistory}
             onQuestionClick={handleQuestionClick}
-            onBlockPreview={setBlockPreview}
+            onBlockPreview={handleBlockPreview}
           />
         </div>
       </div>

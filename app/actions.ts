@@ -23,7 +23,7 @@ export async function submitApiCredentials(formData: FormData) {
   if (!userId || !apiKey) {
     return {
       success: false,
-      message: "User ID and API Key are required",
+      message: "User ID and Project API Key are required",
     };
   }
 

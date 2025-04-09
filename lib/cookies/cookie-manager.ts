@@ -23,7 +23,7 @@ export async function setApiCredentials(userId: string, apiKey: string) {
     sameSite: "strict",
   });
 
-  // Set API key with 1-day expiry and security options enabled
+  // Set Project API key with 1-day expiry and security options enabled
   cookieStore.set("api_key", encryptData(apiKey), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

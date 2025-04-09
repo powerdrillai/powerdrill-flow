@@ -19,7 +19,8 @@ export default function SplitLayout({
   onToggle,
 }: SplitLayoutProps) {
   return (
-    <div className="flex h-screen w-full overflow-hidden">
+    <div className="flex h-screen w-full overflow-hidden pt-12">
+      {/* Add padding-top for fixed header */}
       {/* Left Sidebar */}
       <div
         className={`relative border-r transition-all duration-300 ease-in-out ${
@@ -29,7 +30,7 @@ export default function SplitLayout({
         {/* Toggle Button */}
         <button
           onClick={() => onToggle(!collapsed)}
-          className={`bg-background/90 hover:bg-background absolute top-24 -right-6 z-[1] flex h-12 w-6 items-center justify-center rounded-r-lg border border-l-0 shadow-md ${
+          className={`bg-background/90 hover:bg-background absolute top-12 -right-6 z-[1] flex h-12 w-6 items-center justify-center rounded-r-lg border border-l-0 shadow-md ${
             collapsed ? "bg-background/90 hover:bg-background" : ""
           }`}
         >

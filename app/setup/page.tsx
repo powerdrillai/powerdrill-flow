@@ -32,7 +32,7 @@ type FormValues = {
 // Simplified header with theme toggle and GitHub link
 function SimpleHeader() {
   return (
-    <div className="bg-background/60 sticky top-0 z-10 flex h-12 items-center justify-end overflow-hidden px-4 shadow-sm backdrop-blur">
+    <div className="bg-background/60 fixed top-0 right-0 left-0 z-50 flex h-12 items-center justify-end overflow-hidden px-4 shadow-sm backdrop-blur">
       <div className="flex items-center gap-1">
         <TooltipWrapper title="Open Source on GitHub">
           <Button variant="ghost" size="icon" className="h-8 w-8 p-0" asChild>
@@ -121,10 +121,10 @@ export default function UserSetup() {
               <Card className="border-primary/5 dark:shadow-primary/10 auth-card-glow w-full shadow-lg backdrop-blur-sm dark:bg-black/40">
                 <CardHeader className="text-center">
                   <CardTitle className="text-primary dark:text-primary text-2xl">
-                    Start Your Powerdrill Journey
+                    Start Your Journey
                   </CardTitle>
                   <CardDescription className="dark:text-accent-foreground/80">
-                    Enter your Powerdrill API credentials to continue
+                    Unlock 100X Productivity with AI Data Analysis
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -148,7 +148,7 @@ export default function UserSetup() {
                       </div>
                       <div className="grid gap-1.5">
                         <Label htmlFor="apiKey" className="text-foreground/90">
-                          API Key
+                          Project API Key
                         </Label>
                         <Textarea
                           id="apiKey"
@@ -157,7 +157,7 @@ export default function UserSetup() {
                         />
                         {errors.apiKey && (
                           <p className="text-sm text-red-500">
-                            API Key is required
+                            Project API Key is required
                           </p>
                         )}
                       </div>
