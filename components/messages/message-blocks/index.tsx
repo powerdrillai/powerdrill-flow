@@ -1,6 +1,6 @@
 "use client";
 
-import { AnswerBlock } from "@/services/powerdrill/session.service";
+import { AnswerBlock } from "@/types/session";
 
 import { ImageBlockComponent } from "./image-block";
 import { MessageMarkdown } from "./message-markdown";

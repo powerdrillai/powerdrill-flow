@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
-import { ImageBlock } from "@/services/powerdrill/session.service";
+import { ImageBlock } from "@/types/session";
 
 interface ImageBlockProps {
   block: ImageBlock;

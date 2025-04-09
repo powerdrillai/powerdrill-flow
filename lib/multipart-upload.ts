@@ -4,7 +4,7 @@ import {
   CompleteMultipartUploadResponse,
   InitMultipartUploadResponse,
   PartItem,
-} from "@/services/powerdrill/file.service";
+} from "@/types/file";
 
 /**
  * Client-side multipart file upload

@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  SourceContent,
-  SourcesBlock,
-} from "@/services/powerdrill/session.service";
+import { SourceContent, SourcesBlock } from "@/types/session";
 
 interface SourcesBlockProps {
   block: SourcesBlock;

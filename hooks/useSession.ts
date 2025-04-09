@@ -4,9 +4,8 @@ import {
   createSession as apiCreateSession,
   getJobHistory,
   getSession,
-  JobHistoryResult,
-  SessionRecord,
 } from "@/services/powerdrill/session.service";
+import { JobHistoryResult, SessionRecord } from "@/types/session";
 
 // Session creation parameters interface
 interface CreateSessionParams {

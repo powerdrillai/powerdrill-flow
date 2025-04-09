@@ -1,37 +1,11 @@
 import { PowerdrillApiError } from "@/lib/api/errors";
 import { serverPostData } from "@/lib/api/serverApiClient";
-
-// Part information
-export interface PartItem {
-  number: number;
-  size: number;
-  upload_url: string;
-}
-
-// Response data for initializing multipart upload
-export interface InitMultipartUploadResponse {
-  file_object_key: string;
-  part_items: PartItem[];
-  upload_id: string;
-}
-
-// Request parameters for initializing multipart upload
-interface InitMultipartUploadParams {
-  file_name: string;
-  file_size: number;
-  [key: string]: unknown;
-}
-
-// Part tag
-export interface PartEtag {
-  etag: string;
-  number: number;
-}
-
-// Response data for completing multipart upload
-export interface CompleteMultipartUploadResponse {
-  file_object_key: string;
-}
+import {
+  CompleteMultipartUploadResponse,
+  InitMultipartUploadParams,
+  InitMultipartUploadResponse,
+  PartEtag,
+} from "@/types/file";
 
 /**
  * Initialize multipart upload
@@ -45,7 +19,6 @@ export async function initMultipartUpload(fileName: string, fileSize: number) {
       file_name: fileName,
       file_size: fileSize,
     };
-    console.log(params, "POWERDRILL_API_BASE_URL---");
     return await serverPostData<InitMultipartUploadResponse>(
       "/file/init-multipart-upload",
       params

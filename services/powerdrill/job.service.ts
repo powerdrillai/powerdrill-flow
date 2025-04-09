@@ -1,13 +1,6 @@
 import { getApiHeaders } from "@/lib/api/serverApiClient";
 import { getApiCredentials } from "@/lib/cookies/cookie-manager";
-
-export interface CreateJobParams {
-  question: string;
-  datasource_ids?: string[];
-  dataset_id?: string;
-  session_id: string;
-  [key: string]: unknown;
-}
+import { CreateJobParams } from "@/types/job";
 
 export async function createJob(params: CreateJobParams): Promise<Response> {
   const credentials = await getApiCredentials();

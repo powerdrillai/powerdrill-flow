@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { QuestionsBlock } from "@/services/powerdrill/session.service";
+import { QuestionsBlock } from "@/types/session";
 
 interface QuestionsBlockProps {
   block: QuestionsBlock;
