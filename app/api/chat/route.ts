@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 
 import { handleApiError } from "@/lib/api/serverApiClient";
-import { createJob, CreateJobParams } from "@/services/powerdrill/job.service";
+import { createJob } from "@/services/powerdrill/job.service";
+import { CreateJobParams } from "@/types/job";
 
 export async function POST(req: Request) {
   const params = await req.json();

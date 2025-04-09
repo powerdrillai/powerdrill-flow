@@ -1,7 +1,7 @@
 import { Loader2Icon } from "lucide-react";
 
 import { MessageGroup } from "@/hooks/usePowerdrillChat";
-import { AnswerBlock } from "@/services/powerdrill/session.service";
+import { AnswerBlock } from "@/types/session";
 
 import MessageBlocks from "../messages/message-blocks";
 import { ChatBlockPreview } from "./chat-block-preview";

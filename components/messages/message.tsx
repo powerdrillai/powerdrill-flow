@@ -12,7 +12,7 @@ import { Ellipsis } from "@/components/ui/ellipsis";
 import { LoadingDots } from "@/components/ui/loading-dots";
 import { MessageGroup } from "@/hooks/usePowerdrillChat";
 import { cn } from "@/lib/utils";
-import { AnswerBlock } from "@/services/powerdrill/session.service";
+import { AnswerBlock } from "@/types/session";
 
 import MessageBlock from "./message-blocks";
 

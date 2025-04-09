@@ -4,34 +4,19 @@ import { v4 as uuidv4 } from "uuid";
 
 import { ClientErrorCode } from "@/lib/api/errors";
 import { appToast } from "@/lib/toast";
+import { PowerdrillEventType } from "@/types/powerdrill";
 import {
-  CodeBlock,
-  ImageBlock,
+  AnswerBlock,
   ImageContent,
   JobRecord,
-  MessageBlock,
-  QuestionsBlock,
-  // SourceContent,
-  SourcesBlock,
-  TableBlock,
   TableContent,
-  TaskBlock,
   TaskContent,
-} from "@/services/powerdrill/session.service";
-import { PowerdrillEventType } from "@/types/powerdrill";
+} from "@/types/session";
 
 // Task block interface definition
 
 export interface Answer {
-  blocks: (
-    | MessageBlock
-    | CodeBlock
-    | TableBlock
-    | ImageBlock
-    | SourcesBlock
-    | QuestionsBlock
-    | TaskBlock
-  )[];
+  blocks: AnswerBlock[];
   group_id?: string;
   group_name?: string;
   stage?: string;
@@ -92,16 +77,6 @@ interface StreamEvent {
   id?: string;
   retry?: number;
 }
-
-// Define union type for blocks
-type AnswerBlock =
-  | MessageBlock
-  | CodeBlock
-  | TableBlock
-  | ImageBlock
-  | SourcesBlock
-  | QuestionsBlock
-  | TaskBlock;
 
 // Define block type in accumulator
 interface AccumulatedBlock {

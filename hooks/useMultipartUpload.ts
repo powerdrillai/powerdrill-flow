@@ -3,8 +3,8 @@ import { useMutation } from "@tanstack/react-query";
 import {
   completeMultipartUpload,
   initMultipartUpload,
-  PartEtag,
 } from "@/services/powerdrill/file.service";
+import { PartEtag } from "@/types/file";
 
 interface UploadProgress {
   fileName: string;

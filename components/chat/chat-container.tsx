@@ -8,8 +8,8 @@ import ChatInput from "@/components/chat-input";
 import { AppHeader } from "@/components/ui/app-header";
 import { usePowerdrillChat } from "@/hooks/usePowerdrillChat";
 import { useSession } from "@/hooks/useSession";
-import { AnswerBlock } from "@/services/powerdrill/session.service";
 import { useSessionStore } from "@/store/session-store";
+import { AnswerBlock } from "@/types/session";
 
 import { ChatCanvas } from "./chat-canvas";
 import ChatMessages from "./chat-messages";

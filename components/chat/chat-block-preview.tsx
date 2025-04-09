@@ -1,6 +1,6 @@
 import { X } from "lucide-react";
 
-import { AnswerBlock } from "@/services/powerdrill/session.service";
+import { AnswerBlock } from "@/types/session";
 
 import MessageBlocks from "../messages/message-blocks";
 import { Button } from "../ui/button";

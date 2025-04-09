@@ -2,7 +2,7 @@
 
 import Message from "@/components/messages/message";
 import { MessageGroup } from "@/hooks/usePowerdrillChat";
-import { AnswerBlock } from "@/services/powerdrill/session.service";
+import { AnswerBlock } from "@/types/session";
 
 import { QuestionsBlockComponent } from "../messages/message-blocks/questions-block";
 

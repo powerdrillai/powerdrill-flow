@@ -15,7 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { TooltipWrapper } from "@/components/ui/tooltip-wrapper";
-import { TableBlock } from "@/services/powerdrill/session.service";
+import { TableBlock } from "@/types/session";
 
 interface TableBlockProps {
   block: TableBlock;

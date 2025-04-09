@@ -4,7 +4,7 @@ import { Loader2, PlusIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { TooltipWrapper } from "@/components/ui/tooltip-wrapper";
-import { SessionRecord } from "@/services/powerdrill/session.service";
+import { SessionRecord } from "@/types/session";
 
 interface SessionHeaderProps {
   session?: SessionRecord;
