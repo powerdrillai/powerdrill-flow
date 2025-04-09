@@ -44,35 +44,31 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: hsl(0 0% 100%);
-  --success: hsl(142, 76%, 36%);
-  --success-foreground: hsl(0 0% 100%);
-  --pending: hsl(200, 97%, 63%);
-  --pending-foreground: hsl(0 0% 100%);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  --background: oklch(0.99 0.01 60);
+  --foreground: oklch(0.1 0.01 60);
+  --muted: oklch(0.91 0.02 60);
+  --muted-foreground: oklch(0.4 0.02 60);
+  --popover: oklch(0.99 0.01 60);
+  --popover-foreground: oklch(0.1 0.01 60);
+  --card: oklch(0.99 0.01 60);
+  --card-foreground: oklch(0.1 0.01 60);
+  --border: oklch(0.94 0.01 60);
+  --input: oklch(0.94 0.01 60);
+  --primary: oklch(0.65 0.2 60);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.91 0.03 60);
+  --secondary-foreground: oklch(0.4 0.03 60);
+  --accent: oklch(0.86 0.05 60);
+  --accent-foreground: oklch(0.35 0.05 60);
+  --destructive: oklch(0.45 0.25 30);
+  --destructive-foreground: oklch(0.9 0.1 30);
+  --ring: oklch(0.65 0.2 60);
+  --chart-1: oklch(0.65 0.2 60);
+  --chart-2: oklch(0.91 0.03 60);
+  --chart-3: oklch(0.86 0.05 60);
+  --chart-4: oklch(0.94 0.02 60);
+  --chart-5: oklch(0.65 0.2 60);
+  --radius: 0.5rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -84,29 +80,29 @@
 }
 
 .dark {
-  --background: hsl(233 18% 19%);
-  --foreground: hsl(173 24% 93%);
-  --muted: hsl(233 12% 23%);
-  --muted-foreground: hsl(233 12% 73%);
-  --popover: hsl(233 18% 16%);
-  --popover-foreground: hsl(0 0% 100%);
-  --card: hsl(233 18% 17%);
-  --card-foreground: hsl(173 24% 98%);
-  --border: hsl(233 8% 24%);
-  --input: hsl(233 8% 27%);
-  --primary: hsl(44 100% 71%);
-  --primary-foreground: hsl(44 100% 11%);
-  --secondary: hsl(44 30% 25%);
-  --secondary-foreground: hsl(44 30% 85%);
-  --accent: hsl(233 18% 34%);
-  --accent-foreground: hsl(233 18% 94%);
-  --destructive: hsl(10 90% 57%);
-  --destructive-foreground: hsl(0 0% 100%);
-  --success: hsl(142, 76%, 36%);
-  --success-foreground: hsl(0 0% 100%);
-  --pending: hsl(200, 97%, 63%);
-  --pending-foreground: hsl(0 0% 100%);
-  --ring: hsl(44 100% 71%);
+  --background: oklch(0.25 0.03 260);
+  --foreground: oklch(0.9 0.05 170);
+  --muted: oklch(0.3 0.02 260);
+  --muted-foreground: oklch(0.75 0.02 260);
+  --popover: oklch(0.22 0.03 260);
+  --popover-foreground: oklch(1 0 0);
+  --card: oklch(0.23 0.03 260);
+  --card-foreground: oklch(0.95 0.05 170);
+  --border: oklch(0.3 0.01 260);
+  --input: oklch(0.33 0.01 260);
+  --primary: oklch(0.8 0.15 90);
+  --primary-foreground: oklch(0.2 0.15 90);
+  --secondary: oklch(0.35 0.08 90);
+  --secondary-foreground: oklch(0.85 0.08 90);
+  --accent: oklch(0.4 0.03 260);
+  --accent-foreground: oklch(0.92 0.03 260);
+  --destructive: oklch(0.65 0.25 30);
+  --destructive-foreground: oklch(1 0 0);
+  --success: oklch(0.55 0.2 150);
+  --success-foreground: oklch(1 0 0);
+  --pending: oklch(0.7 0.2 220);
+  --pending-foreground: oklch(1 0 0);
+  --ring: oklch(0.8 0.15 90);
   --chart-1: oklch(0.55 0.19 260);
   --chart-2: oklch(0.65 0.15 195);
   --chart-3: oklch(0.7 0.15 150);
@@ -131,7 +127,7 @@
     overflow-x: hidden;
     overflow-y: auto;
   }
-  
+
   /* Allow vertical scrolling */
   html, body {
     overflow-x: hidden;
