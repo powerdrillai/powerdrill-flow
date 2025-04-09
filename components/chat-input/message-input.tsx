@@ -14,8 +14,6 @@ export function MessageInput({
   onChange,
   onKeyDown,
   isLoading,
-  datasetId,
-  datasetName,
 }: MessageInputProps) {
   return (
     <div className="relative">

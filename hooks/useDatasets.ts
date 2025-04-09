@@ -4,9 +4,9 @@ import { useState } from "react";
 import {
   getDatasetOverview,
   listDatasets,
-  ListDatasetsParams,
 } from "@/services/powerdrill/dataset.service";
-import { DatasetListResult, DatasetRecord } from "@/types/data";
+import { DatasetRecord } from "@/types/data";
+import { ListDatasetsParams } from "@/types/dataset";
 
 export interface UseDatasetsOptions {
   pageSize?: number;

@@ -14,23 +14,24 @@ interface DatasetInfoProps {
   onChange: (dataset: SelectedDataset | null) => void;
 }
 
-export function DatasetInfo({ dataset, onChange }: DatasetInfoProps) {
-  if (!dataset) return null;
-  const { datasource } = dataset;
+export function DatasetInfo({ dataset }: DatasetInfoProps) {
+  const { datasource } = dataset || {};
   const { setDeletedDataSourceInfo } = useDatasetEventsStore();
 
   const handleUnselect = (id: string) => {
     // Instead of directly updating the dataset, emit a data source deletion event
     // This will be handled by the useEffect hook in the ChatInput component
     setDeletedDataSourceInfo({
-      datasetId: dataset.id,
-      dataSourceId: id
+      datasetId: dataset?.id || "",
+      dataSourceId: id,
     });
   };
 
+  if (!dataset) return null;
+
   return (
     <div className="relative flex items-center gap-3 overflow-x-auto px-4 py-3">
-      {datasource.map((item) => {
+      {datasource?.map((item) => {
         const status = item.status || "creating";
         const fileType = item.name.split(".").pop()?.toLowerCase();
         const FileIconComponent = FileIcon[fileType as keyof typeof FileIcon];

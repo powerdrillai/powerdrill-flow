@@ -10,8 +10,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-import { useDatasetEventsStore } from "@/store/dataset-events-store";
-
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,6 +32,7 @@ import { TooltipWrapper } from "@/components/ui/tooltip-wrapper";
 import { appToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import { deleteDataset } from "@/services/powerdrill/dataset.service";
+import { useDatasetEventsStore } from "@/store/dataset-events-store";
 import { DatasetRecord } from "@/types/data";
 
 interface DatasetCardProps {
@@ -125,7 +124,7 @@ export function DatasetCard({ dataset, onClick, onDelete }: DatasetCardProps) {
       if (onDelete) {
         onDelete(dataset.id);
       }
-    } catch (error) {
+    } catch (_e) {
       appToast.error("Failed to delete dataset", {
         description: `There was an error deleting the dataset. Please try again.`,
       });
@@ -137,103 +136,104 @@ export function DatasetCard({ dataset, onClick, onDelete }: DatasetCardProps) {
   return (
     <>
       <Card
-        className="hover:border-primary/50 w-full cursor-pointer transition-all duration-200 hover:shadow-md relative group"
+        className="hover:border-primary/50 group relative w-full cursor-pointer transition-all duration-200 hover:shadow-md"
         onClick={() => onClick(dataset)}
       >
-      <CardHeader className="flex h-full flex-col py-3">
-        <div className="flex w-full items-center justify-between">
-          <TooltipWrapper title={dataset.name} side="top">
-            <CardTitle className="flex max-w-[calc(100%-90px)] items-center gap-1 truncate text-sm font-medium">
-              <Database className="text-primary h-3.5 w-3.5 flex-shrink-0" />
-              <span className="truncate">{dataset.name}</span>
-            </CardTitle>
-          </TooltipWrapper>
-          <Badge
-            variant={variant}
-            className={cn(
-              "flex h-5 min-w-[70px] flex-shrink-0 items-center justify-center gap-1 px-2 text-xs",
-              className
-            )}
-          >
-            <StatusIcon className="h-2.5 w-2.5" />
-            {label}
-          </Badge>
-        </div>
-
-        {/* Keywords */}
-
-        <div className="mt-0.5 mb-0.5 flex min-h-[30px] flex-wrap gap-1">
-          {displayKeywords.map((keyword, i) => (
+        <CardHeader className="flex h-full flex-col py-3">
+          <div className="flex w-full items-center justify-between">
+            <TooltipWrapper title={dataset.name} side="top">
+              <CardTitle className="flex max-w-[calc(100%-90px)] items-center gap-1 truncate text-sm font-medium">
+                <Database className="text-primary h-3.5 w-3.5 flex-shrink-0" />
+                <span className="truncate">{dataset.name}</span>
+              </CardTitle>
+            </TooltipWrapper>
             <Badge
-              key={i}
-              variant="outline"
-              className="bg-muted/30 flex h-4 items-center gap-0.5 px-1.5 text-[10px]"
+              variant={variant}
+              className={cn(
+                "flex h-5 min-w-[70px] flex-shrink-0 items-center justify-center gap-1 px-2 text-xs",
+                className
+              )}
             >
-              <Tag className="h-2 w-2" />
-              {keyword}
+              <StatusIcon className="h-2.5 w-2.5" />
+              {label}
             </Badge>
-          ))}
-          {keywords.length > 3 && (
-            <span className="text-muted-foreground text-[10px]">
-              +{keywords.length - 3} more
-            </span>
-          )}
-        </div>
+          </div>
 
-        <TooltipWrapper title={summaryText} side="bottom">
-          <CardDescription className="mt-1 text-xs">
-            <div className="summary-truncate">{summaryText}</div>
-          </CardDescription>
-        </TooltipWrapper>
-      </CardHeader>
+          {/* Keywords */}
 
-      {/* Delete button */}
-      <div
-        className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <TooltipWrapper title="Delete dataset">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 text-muted-foreground hover:text-destructive"
-            onClick={handleDeleteClick}
-          >
-            <Trash2 className="h-4 w-4" />
-            <span className="sr-only">Delete</span>
-          </Button>
-        </TooltipWrapper>
-      </div>
-    </Card>
-
-    {/* Delete confirmation dialog */}
-    <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Delete Dataset</AlertDialogTitle>
-          <AlertDialogDescription>
-            Are you sure you want to delete the dataset "{dataset.name}"? This action cannot be undone.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={handleDeleteConfirm}
-            disabled={isDeleting}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          >
-            {isDeleting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Deleting...
-              </>
-            ) : (
-              "Delete"
+          <div className="mt-0.5 mb-0.5 flex min-h-[30px] flex-wrap gap-1">
+            {displayKeywords.map((keyword, i) => (
+              <Badge
+                key={i}
+                variant="outline"
+                className="bg-muted/30 flex h-4 items-center gap-0.5 px-1.5 text-[10px]"
+              >
+                <Tag className="h-2 w-2" />
+                {keyword}
+              </Badge>
+            ))}
+            {keywords.length > 3 && (
+              <span className="text-muted-foreground text-[10px]">
+                +{keywords.length - 3} more
+              </span>
             )}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+          </div>
+
+          <TooltipWrapper title={summaryText} side="bottom">
+            <CardDescription className="mt-1 text-xs">
+              <div className="summary-truncate">{summaryText}</div>
+            </CardDescription>
+          </TooltipWrapper>
+        </CardHeader>
+
+        {/* Delete button */}
+        <div
+          className="absolute top-3 right-3 opacity-0 transition-opacity group-hover:opacity-100"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <TooltipWrapper title="Delete dataset">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-muted-foreground hover:text-destructive h-7 w-7"
+              onClick={handleDeleteClick}
+            >
+              <Trash2 className="h-4 w-4" />
+              <span className="sr-only">Delete</span>
+            </Button>
+          </TooltipWrapper>
+        </div>
+      </Card>
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Dataset</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the dataset &quot;{dataset.name}
+              &quot;? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

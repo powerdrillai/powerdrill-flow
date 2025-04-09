@@ -40,7 +40,12 @@ export default function ChatInput({
   );
 
   // Get the dataset events from the store
-  const { deletedDatasetId, deletedDataSourceInfo, setDeletedDataSourceInfo, setDeletedDatasetId } = useDatasetEventsStore();
+  const {
+    deletedDatasetId,
+    deletedDataSourceInfo,
+    setDeletedDataSourceInfo,
+    setDeletedDatasetId,
+  } = useDatasetEventsStore();
 
   // Listen for dataset deletion events
   useEffect(() => {
@@ -50,7 +55,13 @@ export default function ChatInput({
       // Reset the deletedDatasetId to prevent infinite loops
       setDeletedDatasetId(null);
     }
-  }, [deletedDatasetId, session?.selectedDataset?.id, sessionId, setDataset, setDeletedDatasetId]);
+  }, [
+    deletedDatasetId,
+    session?.selectedDataset?.id,
+    sessionId,
+    setDataset,
+    setDeletedDatasetId,
+  ]);
 
   // Listen for data source deletion events
   useEffect(() => {
@@ -77,7 +88,13 @@ export default function ChatInput({
       // Reset the deletedDataSourceInfo to prevent infinite loops
       setDeletedDataSourceInfo(null);
     }
-  }, [deletedDataSourceInfo, session, sessionId, setDataset, setDeletedDataSourceInfo]);
+  }, [
+    deletedDataSourceInfo,
+    session,
+    sessionId,
+    setDataset,
+    setDeletedDataSourceInfo,
+  ]);
 
   // Handle dataset change
   const handleDatasetChange = (dataset: SelectedDataset | null) => {

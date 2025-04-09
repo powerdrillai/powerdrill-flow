@@ -27,7 +27,7 @@ export function Toolbar({
     <div className="flex items-center justify-between px-4 py-3">
       <div className="flex-grow">
         {datasetId && datasetName && (
-          <div className="text-xs text-gray-400/70 flex items-center gap-1">
+          <div className="flex items-center gap-1 text-xs text-gray-400/70">
             <DatabaseIcon className="size-3" />
             {datasetName} ({datasetId})
           </div>

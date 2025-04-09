@@ -3,7 +3,7 @@
 import { cloneDeep } from "lodash-es";
 import { RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import ChatInput from "@/components/chat-input";
@@ -12,6 +12,7 @@ import { AppHeader } from "@/components/ui/app-header";
 import { BackToTop } from "@/components/ui/back-to-top";
 import { Button } from "@/components/ui/button";
 import { TooltipWrapper } from "@/components/ui/tooltip-wrapper";
+import { useDatasets } from "@/hooks/useDatasets";
 import { useSession } from "@/hooks/useSession";
 import { useSessionStore } from "@/store/session-store";
 
@@ -20,7 +21,9 @@ export default function Home() {
   const [inputValue, setInputValue] = useState<string>("");
   const { sessionMap, setSession, clearSession } = useSessionStore();
   const sessionState = sessionMap["home"];
-  const datasetListRef = useRef<{ refetch: () => Promise<any> } | null>(null);
+  const { datasets, isLoading, pagination, refetch } = useDatasets({
+    pageSize: 9,
+  });
 
   // Using TanStack Query session hooks
   const { createSession, isCreating } = useSession();
@@ -87,20 +90,14 @@ export default function Home() {
 
         {/* Dataset Selection Section */}
         <div className="mx-auto mt-12 w-full max-w-6xl pb-20">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="mb-2 flex items-center gap-2">
             <h2 className="text-xl font-semibold">Select a Dataset</h2>
             <TooltipWrapper title="Refresh Datasets">
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7 p-0"
-                onClick={() => {
-                  if (datasetListRef.current) {
-                    datasetListRef.current.refetch().then(() => {
-                      toast.success("Dataset list refreshed");
-                    });
-                  }
-                }}
+                onClick={refetch}
               >
                 <RefreshCw className="h-4 w-4" />
                 <span className="sr-only">Refresh Datasets</span>
@@ -111,7 +108,13 @@ export default function Home() {
             Choose one of your datasets below or use the input above to start a
             new analysis
           </p>
-          <DatasetList ref={datasetListRef} sessionId="home" pageSize={9} />
+          <DatasetList
+            sessionId="home"
+            isLoading={isLoading}
+            datasets={datasets}
+            pagination={pagination}
+            refetch={refetch}
+          />
         </div>
       </div>
 

@@ -1,5 +1,11 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { FileIcon, FolderOpenIcon, PaperclipIcon, UploadCloudIcon, UploadIcon } from "lucide-react";
+import {
+  FileIcon,
+  FolderOpenIcon,
+  PaperclipIcon,
+  UploadCloudIcon,
+  UploadIcon,
+} from "lucide-react";
 import { useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
@@ -128,7 +134,9 @@ export function FileSelector({ disabled, sessionId }: FileSelectorProps) {
   };
 
   // Track the current upload mode
-  const [uploadMode, setUploadMode] = useState<"new-dataset" | "existing-dataset">("new-dataset");
+  const [uploadMode, setUploadMode] = useState<
+    "new-dataset" | "existing-dataset"
+  >("new-dataset");
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -183,7 +191,6 @@ export function FileSelector({ disabled, sessionId }: FileSelectorProps) {
       } else if (uploadMode === "existing-dataset") {
         await uploadFilesToExistingDataset(validFiles);
       }
-
     } catch (error) {
       console.error("Failed to upload file:", error);
 
@@ -309,9 +316,14 @@ export function FileSelector({ disabled, sessionId }: FileSelectorProps) {
   // Upload files to an existing dataset
   const uploadFilesToExistingDataset = async (validFiles: File[]) => {
     // Check if a dataset is selected and has a valid ID
-    if (!session?.selectedDataset || !session.selectedDataset.id || !Array.isArray(session.selectedDataset.datasource)) {
+    if (
+      !session?.selectedDataset ||
+      !session.selectedDataset.id ||
+      !Array.isArray(session.selectedDataset.datasource)
+    ) {
       appToast.error("No Dataset Selected", {
-        description: "Please select a dataset first before uploading files to it.",
+        description:
+          "Please select a dataset first before uploading files to it.",
         icon: <FileIcon className="size-5" />,
       });
       return;
@@ -378,7 +390,9 @@ export function FileSelector({ disabled, sessionId }: FileSelectorProps) {
       ...updatedDataset,
       datasource: updatedDataset.datasource.map((source) => {
         // Check if this is one of the newly added data sources
-        const isNewSource = tempDataSources.some(temp => temp.id === source.id);
+        const isNewSource = tempDataSources.some(
+          (temp) => temp.id === source.id
+        );
         if (isNewSource) {
           const matchedSource = dataSourceMap[source.name];
           return {

@@ -637,7 +637,8 @@ export function FileTree({ onSelect }: FileTreeProps) {
                   Array.isArray(datasetSourcesMap[dataset.id]) &&
                   datasetSourcesMap[dataset.id].length > 0) ||
                 (datasourceQueriesMap[dataset.id]?.data &&
-                  datasourceQueriesMap[dataset.id]?.data?.length > 0) ||
+                  (datasourceQueriesMap[dataset.id]?.data?.length as number) >
+                    0) ||
                 // Check if there are temporary data sources in the session store
                 // Only consider data sources that are in the "creating" or "synching" state
                 // AND only if the dataset is expanded (to ensure we've checked the backend)
@@ -666,7 +667,8 @@ export function FileTree({ onSelect }: FileTreeProps) {
                     // Then check if there are data sources in the datasourceQueriesMap
                     if (
                       datasourceQueriesMap[dataset.id]?.data &&
-                      datasourceQueriesMap[dataset.id]?.data?.length > 0
+                      (datasourceQueriesMap[dataset.id]?.data
+                        ?.length as number) > 0
                     ) {
                       return datasourceQueriesMap[dataset.id]?.data || [];
                     }

@@ -10,7 +10,9 @@ interface DatasetEventsState {
     datasetId: string;
     dataSourceId: string;
   } | null;
-  setDeletedDataSourceInfo: (info: { datasetId: string; dataSourceId: string } | null) => void;
+  setDeletedDataSourceInfo: (
+    info: { datasetId: string; dataSourceId: string } | null
+  ) => void;
 
   // Event for data source creation
   createdDataSourceInfo: {

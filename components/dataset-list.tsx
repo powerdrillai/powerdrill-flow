@@ -1,14 +1,12 @@
 "use client";
 
-import { forwardRef, useEffect, useImperativeHandle } from "react";
-import { toast } from "sonner";
-
 import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { toast } from "sonner";
 
 import { DatasetCard } from "@/components/dataset-card";
 import { Pagination } from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useDatasets } from "@/hooks/useDatasets";
 import { listDataSources } from "@/services/powerdrill/datasource.service";
 import { useSessionStore } from "@/store/session-store";
 import { DatasetRecord } from "@/types/data";
@@ -16,21 +14,26 @@ import { DatasetRecord } from "@/types/data";
 export interface DatasetListProps {
   sessionId?: string;
   pageSize?: number;
+  isLoading: boolean;
+  datasets: DatasetRecord[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    changePage: (page: number) => void;
+  };
+  refetch: () => Promise<unknown>;
 }
 
-export const DatasetList = forwardRef<{ refetch: () => Promise<any> }, DatasetListProps>((
-  {
-    sessionId = "home",
-    pageSize = 12,
-  },
-  ref
-) => {
-  const { datasets, isLoading, pagination, refetch } = useDatasets({ pageSize });
-
-  // Expose the refetch method to the parent component
-  useImperativeHandle(ref, () => ({
-    refetch,
-  }));
+export const DatasetList = ({
+  sessionId = "home",
+  pageSize = 12,
+  refetch,
+  isLoading,
+  datasets,
+  pagination,
+}: DatasetListProps) => {
+  // Expose the refetch method to the parent componen
   const { setDataset } = useSessionStore();
   const queryClient = useQueryClient();
 
@@ -114,7 +117,7 @@ export const DatasetList = forwardRef<{ refetch: () => Promise<any> }, DatasetLi
   }
 
   // Handle dataset deletion
-  const handleDeleteDataset = async (datasetId: string) => {
+  const handleDeleteDataset = async () => {
     // Invalidate datasets query to refresh the list
     await queryClient.invalidateQueries({ queryKey: ["datasets"] });
     // Refetch datasets
@@ -151,4 +154,4 @@ export const DatasetList = forwardRef<{ refetch: () => Promise<any> }, DatasetLi
       </div>
     </div>
   );
-});
+};
