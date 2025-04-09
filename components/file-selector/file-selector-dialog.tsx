@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import FileTree from "@/components/file-selector/file-tree";
+import { FileTree } from "@/components/file-selector/file-tree";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

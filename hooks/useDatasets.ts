@@ -1,24 +1,49 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 
 import {
   getDatasetOverview,
   listDatasets,
+  ListDatasetsParams,
 } from "@/services/powerdrill/dataset.service";
-import { DatasetRecord } from "@/types/data";
+import { DatasetListResult, DatasetRecord } from "@/types/data";
 
-export function useDatasets() {
-  // First fetch the list of datasets
+export interface UseDatasetsOptions {
+  pageSize?: number;
+  initialPage?: number;
+}
+
+export function useDatasets(options: UseDatasetsOptions = {}) {
+  const { pageSize = 12, initialPage = 1 } = options;
+  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
+  // First fetch the list of datasets with pagination
   const {
-    data: basicDatasets,
+    data: datasetsResult,
     isLoading: isLoadingBasic,
     error: basicError,
+    refetch: refetchDatasets,
   } = useQuery({
-    queryKey: ["datasets-list"],
+    queryKey: ["datasets-list", currentPage, pageSize],
     queryFn: async () => {
-      const result = await listDatasets({ page_size: 100 });
-      return result.records;
+      const params: ListDatasetsParams = {
+        page_number: currentPage,
+        page_size: pageSize,
+      };
+      const result = await listDatasets(params);
+
+      // Update pagination state
+      setTotalItems(result.total_items);
+      setTotalPages(Math.ceil(result.total_items / pageSize));
+
+      return result;
     },
   });
+
+  // Extract basic dataset records
+  const basicDatasets = datasetsResult?.records || [];
 
   // Then fetch overview data for each dataset to get summary information
   const overviewQueries = useQueries({
@@ -58,26 +83,25 @@ export function useDatasets() {
           .map((query) => query.data as DatasetRecord)
           .filter(Boolean)
       : basicDatasets || [];
+  // Function to change page
+  const changePage = (page: number) => {
+    setCurrentPage(page);
+  };
+
   return {
     datasets: enrichedDatasets,
     isLoading: isLoadingBasic || isLoadingOverviews,
     error: basicError || overviewError,
+    pagination: {
+      currentPage,
+      totalPages,
+      totalItems,
+      pageSize,
+      changePage,
+    },
     refetch: () => {
-      // Refetch both the basic list and all overviews
-      const basicPromise = basicDatasets
-        ? Promise.resolve(basicDatasets)
-        : listDatasets({ page_size: 100 }).then((result) => result.records);
-
-      return basicPromise.then((datasets) => {
-        datasets.forEach((dataset) => {
-          getDatasetOverview(dataset.id).catch((error) => {
-            console.error(
-              `Failed to refetch overview for dataset ${dataset.id}:`,
-              error
-            );
-          });
-        });
-      });
+      // Refetch the datasets list with current pagination
+      return refetchDatasets();
     },
   };
 }

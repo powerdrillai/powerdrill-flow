@@ -88,7 +88,7 @@ export default function Home() {
             Choose one of your datasets below or use the input above to start a
             new analysis
           </p>
-          <DatasetList sessionId="home" />
+          <DatasetList sessionId="home" pageSize={9} />
         </div>
       </div>
 
