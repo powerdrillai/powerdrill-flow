@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { FileIcon, PaperclipIcon, UploadIcon } from "lucide-react";
+import { FileIcon, FolderOpenIcon, PaperclipIcon, UploadCloudIcon, UploadIcon } from "lucide-react";
 import { useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
@@ -17,6 +17,7 @@ import {
   createDataSource,
   listDataSources,
 } from "@/services/powerdrill/datasource.service";
+import { useDatasetEventsStore } from "@/store/dataset-events-store";
 import { useSessionStore } from "@/store/session-store";
 import { DataSourceRecord, SelectedDataset } from "@/types/data";
 
@@ -47,6 +48,7 @@ const MAX_FILES = 10;
 
 export function FileSelector({ disabled, sessionId }: FileSelectorProps) {
   const { sessionMap, setDataset, clearSession } = useSessionStore();
+  const { setCreatedDataSourceInfo } = useDatasetEventsStore();
   const session = sessionMap[sessionId];
   const [fileSelectorOpen, setFileSelectorOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -113,9 +115,20 @@ export function FileSelector({ disabled, sessionId }: FileSelectorProps) {
     },
   });
 
-  const handleUploadFile = () => {
+  const handleUploadFileWithNewDataset = () => {
+    // Set the upload mode to create a new dataset
+    setUploadMode("new-dataset");
     fileInputRef.current?.click();
   };
+
+  const handleUploadFileToExistingDataset = () => {
+    // Set the upload mode to add to existing dataset
+    setUploadMode("existing-dataset");
+    fileInputRef.current?.click();
+  };
+
+  // Track the current upload mode
+  const [uploadMode, setUploadMode] = useState<"new-dataset" | "existing-dataset">("new-dataset");
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -164,98 +177,13 @@ export function FileSelector({ disabled, sessionId }: FileSelectorProps) {
     try {
       setIsUploading(true);
 
-      // Clear current session data
-      clearSession(sessionId);
+      // Upload files to either a new dataset or an existing dataset based on the upload mode
+      if (uploadMode === "new-dataset") {
+        await uploadFilesToNewDataset(validFiles);
+      } else if (uploadMode === "existing-dataset") {
+        await uploadFilesToExistingDataset(validFiles);
+      }
 
-      // Create temporary dataset object
-      const datasetId = uuidv4();
-      const datasetName = `Dataset_${new Date().toISOString().replace(/[-:]/g, "").replace("T", "_").split(".")[0]}`;
-
-      const tempDataset: SelectedDataset = {
-        id: datasetId,
-        name: datasetName,
-        description: "",
-        datasource: validFiles.map((file) => ({
-          id: uuidv4(),
-          name: file.name,
-          status: "creating",
-          type: "FILE",
-          size: file.size,
-          dataset_id: datasetId,
-        })),
-      };
-
-      // Set temporary dataset
-      setDataset(sessionId, tempDataset);
-
-      // Upload files
-      const fileObjectKeys = await upload(validFiles);
-
-      // Create mapping between file names and object keys
-      const fileObjectKeyMap = validFiles.reduce(
-        (map, file, index) => {
-          map[file.name] = fileObjectKeys[index];
-          return map;
-        },
-        {} as Record<string, string>
-      );
-
-      // Create dataset
-      const createdDatasetId = await createDatasetMutation.mutateAsync({
-        name: datasetName,
-        description: "",
-      });
-      console.log("createdDatasetId", createdDatasetId);
-
-      // Create data source and get ID
-      const createdDataSources = await Promise.all(
-        validFiles.map(async (file) => {
-          const fileObjectKey = fileObjectKeyMap[file.name];
-          const dataSource = await createDataSourceMutation.mutateAsync({
-            datasetId: createdDatasetId,
-            name: file.name,
-            file_object_key: fileObjectKey,
-          });
-          return { fileName: file.name, dataSource };
-        })
-      );
-
-      // Create mapping from filename to data source
-      const dataSourceMap = createdDataSources.reduce(
-        (map, item) => {
-          map[item.fileName] = item.dataSource as DataSourceRecord;
-          return map;
-        },
-        {} as Record<string, DataSourceRecord>
-      );
-
-      // Update dataset and data source IDs using filename as matching criteria
-      const updatedDataset: SelectedDataset = {
-        ...tempDataset,
-        id: createdDatasetId,
-        datasource: tempDataset.datasource.map((source) => {
-          const matchedSource = dataSourceMap[source.name];
-          return {
-            ...source,
-            id: matchedSource?.id || source.id,
-            dataset_id: createdDatasetId,
-            status: matchedSource?.status || "creating",
-          };
-        }),
-      };
-      // Update to session
-      setDataset(sessionId, updatedDataset);
-
-      // Start polling data source status
-      setPollingDatasetId(createdDatasetId);
-
-      // Files uploaded successfully
-
-      appToast.success("Files Uploaded Successfully", {
-        description: `Dataset and data sources created successfully. Syncing data...`,
-        icon: <FileIcon className="size-5" />,
-        duration: 5000,
-      });
     } catch (error) {
       console.error("Failed to upload file:", error);
 
@@ -281,6 +209,203 @@ export function FileSelector({ disabled, sessionId }: FileSelectorProps) {
         fileInputRef.current.value = "";
       }
     }
+  };
+
+  // Upload files to a new dataset
+  const uploadFilesToNewDataset = async (validFiles: File[]) => {
+    // Clear current session data
+    clearSession(sessionId);
+
+    // Create temporary dataset object
+    const datasetId = uuidv4();
+    const datasetName = `Dataset_${new Date().toISOString().replace(/[-:]/g, "").replace("T", "_").split(".")[0]}`;
+
+    const tempDataset: SelectedDataset = {
+      id: datasetId,
+      name: datasetName,
+      description: "",
+      datasource: validFiles.map((file) => ({
+        id: uuidv4(),
+        name: file.name,
+        status: "creating",
+        type: "FILE",
+        size: file.size,
+        dataset_id: datasetId,
+      })),
+    };
+
+    // Set temporary dataset
+    setDataset(sessionId, tempDataset);
+
+    // Upload files
+    const fileObjectKeys = await upload(validFiles);
+
+    // Create mapping between file names and object keys
+    const fileObjectKeyMap = validFiles.reduce(
+      (map, file, index) => {
+        map[file.name] = fileObjectKeys[index];
+        return map;
+      },
+      {} as Record<string, string>
+    );
+
+    // Create dataset
+    const createdDatasetId = await createDatasetMutation.mutateAsync({
+      name: datasetName,
+      description: "",
+    });
+    console.log("createdDatasetId", createdDatasetId);
+
+    // Create data source and get ID
+    const createdDataSources = await Promise.all(
+      validFiles.map(async (file) => {
+        const fileObjectKey = fileObjectKeyMap[file.name];
+        const dataSource = await createDataSourceMutation.mutateAsync({
+          datasetId: createdDatasetId,
+          name: file.name,
+          file_object_key: fileObjectKey,
+        });
+        return { fileName: file.name, dataSource };
+      })
+    );
+
+    // Create mapping from filename to data source
+    const dataSourceMap = createdDataSources.reduce(
+      (map, item) => {
+        map[item.fileName] = item.dataSource as DataSourceRecord;
+        return map;
+      },
+      {} as Record<string, DataSourceRecord>
+    );
+
+    // Update dataset and data source IDs using filename as matching criteria
+    const updatedDataset: SelectedDataset = {
+      ...tempDataset,
+      id: createdDatasetId,
+      datasource: tempDataset.datasource.map((source) => {
+        const matchedSource = dataSourceMap[source.name];
+        return {
+          ...source,
+          id: matchedSource?.id || source.id,
+          dataset_id: createdDatasetId,
+          status: matchedSource?.status || "creating",
+        };
+      }),
+    };
+    // Update to session
+    setDataset(sessionId, updatedDataset);
+
+    // Start polling data source status
+    setPollingDatasetId(createdDatasetId);
+
+    // Files uploaded successfully
+    appToast.success("Files Uploaded Successfully", {
+      description: `Dataset and data sources created successfully. Syncing data...`,
+      icon: <FileIcon className="size-5" />,
+      duration: 5000,
+    });
+  };
+
+  // Upload files to an existing dataset
+  const uploadFilesToExistingDataset = async (validFiles: File[]) => {
+    // Check if a dataset is selected and has a valid ID
+    if (!session?.selectedDataset || !session.selectedDataset.id || !Array.isArray(session.selectedDataset.datasource)) {
+      appToast.error("No Dataset Selected", {
+        description: "Please select a dataset first before uploading files to it.",
+        icon: <FileIcon className="size-5" />,
+      });
+      return;
+    }
+
+    const existingDataset = session.selectedDataset;
+    const datasetId = existingDataset.id;
+
+    // Create temporary data sources
+    const tempDataSources = validFiles.map((file) => ({
+      id: uuidv4(),
+      name: file.name,
+      status: "creating",
+      type: "FILE",
+      size: file.size,
+      dataset_id: datasetId,
+    }));
+
+    // Update the dataset with the new temporary data sources
+    const updatedDataset: SelectedDataset = {
+      ...existingDataset,
+      datasource: [...existingDataset.datasource, ...tempDataSources],
+    };
+
+    // Update the session with the updated dataset
+    setDataset(sessionId, updatedDataset);
+
+    // Upload files
+    const fileObjectKeys = await upload(validFiles);
+
+    // Create mapping between file names and object keys
+    const fileObjectKeyMap = validFiles.reduce(
+      (map, file, index) => {
+        map[file.name] = fileObjectKeys[index];
+        return map;
+      },
+      {} as Record<string, string>
+    );
+
+    // Create data sources in the existing dataset
+    const createdDataSources = await Promise.all(
+      validFiles.map(async (file) => {
+        const fileObjectKey = fileObjectKeyMap[file.name];
+        const dataSource = await createDataSourceMutation.mutateAsync({
+          datasetId: datasetId,
+          name: file.name,
+          file_object_key: fileObjectKey,
+        });
+        return { fileName: file.name, dataSource };
+      })
+    );
+
+    // Create mapping from filename to data source
+    const dataSourceMap = createdDataSources.reduce(
+      (map, item) => {
+        map[item.fileName] = item.dataSource as DataSourceRecord;
+        return map;
+      },
+      {} as Record<string, DataSourceRecord>
+    );
+
+    // Update the dataset with the actual data source IDs
+    const finalDataset: SelectedDataset = {
+      ...updatedDataset,
+      datasource: updatedDataset.datasource.map((source) => {
+        // Check if this is one of the newly added data sources
+        const isNewSource = tempDataSources.some(temp => temp.id === source.id);
+        if (isNewSource) {
+          const matchedSource = dataSourceMap[source.name];
+          return {
+            ...source,
+            id: matchedSource?.id || source.id,
+            status: matchedSource?.status || "creating",
+          };
+        }
+        return source;
+      }),
+    };
+
+    // Update the session with the final dataset
+    setDataset(sessionId, finalDataset);
+
+    // Start polling data source status
+    setPollingDatasetId(datasetId);
+
+    // Emit data source creation event
+    setCreatedDataSourceInfo({ datasetId });
+
+    // Files uploaded successfully
+    appToast.success("Files Uploaded Successfully", {
+      description: `Files added to dataset "${existingDataset.name}". Syncing data...`,
+      icon: <FileIcon className="size-5" />,
+      duration: 5000,
+    });
   };
 
   const handleSelectExistingFile = () => {
@@ -316,16 +441,26 @@ export function FileSelector({ disabled, sessionId }: FileSelectorProps) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem
-            onClick={handleUploadFile}
+            onClick={handleUploadFileWithNewDataset}
             disabled={isUploading || isMultipartUploading}
           >
             <UploadIcon className="mr-2 h-4 w-4" />
-            <span>Upload File</span>
+            <span>Upload File to New Dataset</span>
           </DropdownMenuItem>
+          {session?.selectedDataset && session.selectedDataset.id && (
+            <DropdownMenuItem
+              onClick={handleUploadFileToExistingDataset}
+              disabled={isUploading || isMultipartUploading}
+            >
+              <UploadCloudIcon className="mr-2 h-4 w-4" />
+              <span>Upload File to This Dataset</span>
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem
             onClick={handleSelectExistingFile}
             disabled={isUploading || isMultipartUploading}
           >
+            <FolderOpenIcon className="mr-2 h-4 w-4" />
             <span>Select Existing File</span>
           </DropdownMenuItem>
         </DropdownMenuContent>

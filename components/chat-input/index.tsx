@@ -1,7 +1,8 @@
 "use client";
 
-import { FormEvent } from "react";
+import { FormEvent, useEffect } from "react";
 
+import { useDatasetEventsStore } from "@/store/dataset-events-store";
 import { useSessionStore } from "@/store/session-store";
 import { SelectedDataset } from "@/types/data";
 
@@ -38,6 +39,46 @@ export default function ChatInput({
     isDatasetSynced ? session?.selectedDataset?.id : undefined
   );
 
+  // Get the dataset events from the store
+  const { deletedDatasetId, deletedDataSourceInfo, setDeletedDataSourceInfo, setDeletedDatasetId } = useDatasetEventsStore();
+
+  // Listen for dataset deletion events
+  useEffect(() => {
+    if (deletedDatasetId && session?.selectedDataset?.id === deletedDatasetId) {
+      // If the deleted dataset is the currently selected dataset, clear it
+      setDataset(sessionId, null);
+      // Reset the deletedDatasetId to prevent infinite loops
+      setDeletedDatasetId(null);
+    }
+  }, [deletedDatasetId, session?.selectedDataset?.id, sessionId, setDataset, setDeletedDatasetId]);
+
+  // Listen for data source deletion events
+  useEffect(() => {
+    if (
+      deletedDataSourceInfo &&
+      session?.selectedDataset?.id === deletedDataSourceInfo.datasetId
+    ) {
+      // If the deleted data source belongs to the currently selected dataset
+      const updatedDatasources = session.selectedDataset.datasource.filter(
+        (source) => source.id !== deletedDataSourceInfo.dataSourceId
+      );
+
+      if (updatedDatasources.length === 0) {
+        // If no data sources remain, clear the dataset
+        setDataset(sessionId, null);
+      } else {
+        // Otherwise, update the dataset with the remaining data sources
+        setDataset(sessionId, {
+          ...session.selectedDataset,
+          datasource: updatedDatasources,
+        });
+      }
+
+      // Reset the deletedDataSourceInfo to prevent infinite loops
+      setDeletedDataSourceInfo(null);
+    }
+  }, [deletedDataSourceInfo, session, sessionId, setDataset, setDeletedDataSourceInfo]);
+
   // Handle dataset change
   const handleDatasetChange = (dataset: SelectedDataset | null) => {
     setDataset(sessionId, dataset);
@@ -72,6 +113,8 @@ export default function ChatInput({
           onChange={onInputChange}
           onKeyDown={handleKeyDown}
           isLoading={isLoading}
+          datasetId={session?.selectedDataset?.id}
+          datasetName={session?.selectedDataset?.name}
         />
       </div>
 
@@ -81,6 +124,8 @@ export default function ChatInput({
         isLoading={isLoading}
         hasInput={!!input?.trim()}
         sessionId={sessionId}
+        datasetId={session?.selectedDataset?.id}
+        datasetName={session?.selectedDataset?.name}
       />
     </div>
   );

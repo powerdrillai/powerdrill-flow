@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { forwardRef, useEffect, useImperativeHandle } from "react";
 import { toast } from "sonner";
 
 import { useQueryClient } from "@tanstack/react-query";
@@ -18,11 +18,19 @@ export interface DatasetListProps {
   pageSize?: number;
 }
 
-export function DatasetList({
-  sessionId = "home",
-  pageSize = 12,
-}: DatasetListProps) {
+export const DatasetList = forwardRef<{ refetch: () => Promise<any> }, DatasetListProps>((
+  {
+    sessionId = "home",
+    pageSize = 12,
+  },
+  ref
+) => {
   const { datasets, isLoading, pagination, refetch } = useDatasets({ pageSize });
+
+  // Expose the refetch method to the parent component
+  useImperativeHandle(ref, () => ({
+    refetch,
+  }));
   const { setDataset } = useSessionStore();
   const queryClient = useQueryClient();
 
@@ -143,4 +151,4 @@ export function DatasetList({
       </div>
     </div>
   );
-}
+});

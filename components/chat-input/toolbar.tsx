@@ -1,4 +1,4 @@
-import { ArrowUpIcon, Loader2Icon } from "lucide-react";
+import { ArrowUpIcon, DatabaseIcon, Loader2Icon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -11,6 +11,8 @@ interface ToolbarProps {
   isLoading: boolean;
   hasInput: boolean;
   sessionId: string;
+  datasetId?: string;
+  datasetName?: string;
 }
 
 export function Toolbar({
@@ -18,10 +20,19 @@ export function Toolbar({
   isLoading,
   hasInput,
   sessionId,
+  datasetId,
+  datasetName,
 }: ToolbarProps) {
   return (
     <div className="flex items-center justify-between px-4 py-3">
-      <div className="flex-grow"></div>
+      <div className="flex-grow">
+        {datasetId && datasetName && (
+          <div className="text-xs text-gray-400/70 flex items-center gap-1">
+            <DatabaseIcon className="size-3" />
+            {datasetName} ({datasetId})
+          </div>
+        )}
+      </div>
       <div className="flex items-center gap-3">
         <FileSelector disabled={isLoading} sessionId={sessionId} />
         <Separator orientation="vertical" className="h-8" />

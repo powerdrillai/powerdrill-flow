@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+import { useDatasetEventsStore } from "@/store/dataset-events-store";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -103,6 +105,9 @@ export function DatasetCard({ dataset, onClick, onDelete }: DatasetCardProps) {
     setShowDeleteDialog(true);
   };
 
+  // Get the setDeletedDatasetId function from the dataset events store
+  const { setDeletedDatasetId } = useDatasetEventsStore();
+
   // Handle dataset deletion
   const handleDeleteConfirm = async () => {
     try {
@@ -112,6 +117,10 @@ export function DatasetCard({ dataset, onClick, onDelete }: DatasetCardProps) {
       appToast.success("Dataset deleted", {
         description: `Dataset "${dataset.name}" has been deleted successfully.`,
       });
+
+      // Emit dataset deletion event
+      setDeletedDatasetId(dataset.id);
+
       // Call the onDelete callback if provided
       if (onDelete) {
         onDelete(dataset.id);

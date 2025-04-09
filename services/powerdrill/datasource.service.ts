@@ -68,7 +68,7 @@ export async function createDataSource(
 export async function getDataSource(
   datasetId: string,
   datasourceId: string,
-  userId: string
+  userId: string = ""
 ): Promise<DataSourceRecord> {
   try {
     const queryParams = new URLSearchParams();

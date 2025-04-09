@@ -41,6 +41,14 @@ export default function FileSelectorDialog({
     }
   }, [dataset]);
 
+  // Force a refresh of the data sources when the dialog is opened
+  useEffect(() => {
+    if (open) {
+      // Reset the selected dataset to force a refresh
+      setSelectedDataset(null);
+    }
+  }, [open]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">

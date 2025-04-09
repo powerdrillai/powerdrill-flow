@@ -2,6 +2,7 @@ import { IconCircleXFilled } from "@tabler/icons-react";
 import { Loader2Icon } from "lucide-react";
 
 import { cn, formatBytes } from "@/lib/utils";
+import { useDatasetEventsStore } from "@/store/dataset-events-store";
 import { SelectedDataset } from "@/types/data";
 
 import { Button } from "../ui/button";
@@ -16,18 +17,15 @@ interface DatasetInfoProps {
 export function DatasetInfo({ dataset, onChange }: DatasetInfoProps) {
   if (!dataset) return null;
   const { datasource } = dataset;
+  const { setDeletedDataSourceInfo } = useDatasetEventsStore();
 
   const handleUnselect = (id: string) => {
-    const newDataset = {
-      ...dataset,
-      datasource: datasource.filter((item) => item.id !== id),
-    };
-    // Clear dataset if no data source remains after deletion
-    if (newDataset.datasource.length === 0) {
-      onChange(null);
-    } else {
-      onChange(newDataset);
-    }
+    // Instead of directly updating the dataset, emit a data source deletion event
+    // This will be handled by the useEffect hook in the ChatInput component
+    setDeletedDataSourceInfo({
+      datasetId: dataset.id,
+      dataSourceId: id
+    });
   };
 
   return (

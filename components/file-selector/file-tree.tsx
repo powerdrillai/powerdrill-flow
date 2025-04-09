@@ -1,13 +1,18 @@
 "use client";
 
-import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useIsFetching,
+  useQueries,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   ChevronDownIcon,
   ChevronRightIcon,
   FolderIcon,
   FolderOpenIcon,
   Loader2,
-  Trash2,
+  RefreshCw,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -31,8 +36,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { TooltipWrapper } from "@/components/ui/tooltip-wrapper";
 import { appToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
-import { deleteDataset, listDatasets } from "@/services/powerdrill/dataset.service";
-import { deleteDataSource, listDataSources } from "@/services/powerdrill/datasource.service";
+import {
+  deleteDataset,
+  listDatasets,
+} from "@/services/powerdrill/dataset.service";
+import { listDataSources } from "@/services/powerdrill/datasource.service";
+import { useDatasetEventsStore } from "@/store/dataset-events-store";
+import { useSessionStore } from "@/store/session-store";
 import { DataSourceRecord, SelectedDataset } from "@/types/data";
 
 import { Button } from "../ui/button";
@@ -43,6 +53,8 @@ interface FileTreeProps {
 }
 
 export function FileTree({ onSelect }: FileTreeProps) {
+  // Get the session store
+  const { sessionMap } = useSessionStore();
   // Currently selected dataset
   const [selectedDataset, setSelectedDataset] = useState<string | null>(null);
   // Currently selected data source list
@@ -51,6 +63,9 @@ export function FileTree({ onSelect }: FileTreeProps) {
   );
   // Track dataset IDs that have already fetched data sources
   const fetchedDatasetsRef = useRef<Set<string>>(new Set());
+
+  // Check if data sources are being fetched
+  const isFetchingDataSources = useIsFetching({ queryKey: ["datasources"] });
   // Track expanded datasets
   const [expandedDatasets, setExpandedDatasets] = useState<Set<string>>(
     new Set()
@@ -60,13 +75,17 @@ export function FileTree({ onSelect }: FileTreeProps) {
     Record<string, DataSourceRecord[]>
   >({});
 
-  // State for delete confirmation dialogs
+  // Get the event setters and data from the dataset events store
+  const {
+    setDeletedDatasetId,
+    deletedDataSourceInfo,
+    setDeletedDataSourceInfo,
+    createdDataSourceInfo,
+    setCreatedDataSourceInfo,
+  } = useDatasetEventsStore();
+
+  // State for delete confirmation dialog
   const [datasetToDelete, setDatasetToDelete] = useState<string | null>(null);
-  const [datasourceToDelete, setDatasourceToDelete] = useState<{
-    id: string;
-    datasetId: string;
-    name: string;
-  } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Query client for invalidating queries
@@ -93,10 +112,8 @@ export function FileTree({ onSelect }: FileTreeProps) {
         const result = await listDataSources(datasetId, { page_size: 100 });
         return result.records;
       },
-      // Only enable query when expanded and never loaded before
-      enabled:
-        expandedDatasets.has(datasetId) &&
-        !fetchedDatasetsRef.current.has(datasetId),
+      // Enable query when dataset is expanded
+      enabled: expandedDatasets.has(datasetId),
       // Add dataset ID to fetched list after successful query
       onSuccess: (data: DataSourceRecord[]) => {
         fetchedDatasetsRef.current.add(datasetId);
@@ -106,9 +123,9 @@ export function FileTree({ onSelect }: FileTreeProps) {
           [datasetId]: data,
         }));
       },
-      // Only fetch once
-      staleTime: Infinity,
-      cacheTime: Infinity,
+      // Allow refetching after 30 seconds
+      staleTime: 30 * 1000,
+      cacheTime: 5 * 60 * 1000, // Cache for 5 minutes
     })),
   });
 
@@ -129,6 +146,130 @@ export function FileTree({ onSelect }: FileTreeProps) {
       setDatasetSourcesMap(newMap);
     }
   }, [datasourceQueries, expandedDatasets, datasetSourcesMap]);
+
+  // Listen for data source creation events
+  useEffect(() => {
+    if (createdDataSourceInfo && createdDataSourceInfo.datasetId) {
+      // Remove from fetched datasets to force refetch
+      fetchedDatasetsRef.current.delete(createdDataSourceInfo.datasetId);
+
+      // Clear the dataset sources map for this dataset
+      setDatasetSourcesMap((prev) => {
+        const newMap = { ...prev };
+        delete newMap[createdDataSourceInfo.datasetId];
+        return newMap;
+      });
+
+      // Invalidate query to force refetch
+      queryClient.invalidateQueries({
+        queryKey: ["datasources", createdDataSourceInfo.datasetId],
+      });
+
+      // Ensure dataset is expanded
+      if (!expandedDatasets.has(createdDataSourceInfo.datasetId)) {
+        setExpandedDatasets(
+          new Set([...expandedDatasets, createdDataSourceInfo.datasetId])
+        );
+      }
+
+      // Reset the createdDataSourceInfo to prevent infinite loops
+      setCreatedDataSourceInfo(null);
+    }
+  }, [
+    createdDataSourceInfo,
+    expandedDatasets,
+    queryClient,
+    setCreatedDataSourceInfo,
+    setDatasetSourcesMap,
+  ]);
+
+  // Listen for data source deletion events
+  useEffect(() => {
+    if (deletedDataSourceInfo && deletedDataSourceInfo.datasetId) {
+      // Remove from fetched datasets to force refetch
+      fetchedDatasetsRef.current.delete(deletedDataSourceInfo.datasetId);
+
+      // Clear the dataset sources map for this dataset
+      setDatasetSourcesMap((prev) => {
+        const newMap = { ...prev };
+        delete newMap[deletedDataSourceInfo.datasetId];
+        return newMap;
+      });
+
+      // Invalidate query to force refetch
+      queryClient.invalidateQueries({
+        queryKey: ["datasources", deletedDataSourceInfo.datasetId],
+      });
+
+      // Ensure dataset is expanded
+      if (!expandedDatasets.has(deletedDataSourceInfo.datasetId)) {
+        setExpandedDatasets(
+          new Set([...expandedDatasets, deletedDataSourceInfo.datasetId])
+        );
+      }
+
+      // Also clean up the session store
+      Object.entries(sessionMap).forEach(([sessionId, session]) => {
+        if (session.selectedDataset?.id === deletedDataSourceInfo.datasetId) {
+          // Filter out the deleted data source
+          const updatedDatasources = session.selectedDataset.datasource.filter(
+            (ds) => ds.id !== deletedDataSourceInfo.dataSourceId
+          );
+
+          // Update the session store
+          if (
+            updatedDatasources.length !==
+            session.selectedDataset.datasource.length
+          ) {
+            const updatedDataset = {
+              ...session.selectedDataset,
+              datasource: updatedDatasources,
+            };
+
+            // Update the session store
+            useSessionStore.getState().setDataset(sessionId, updatedDataset);
+          }
+        }
+      });
+
+      // Reset the deletedDataSourceInfo to prevent infinite loops
+      setDeletedDataSourceInfo(null);
+    }
+  }, [
+    deletedDataSourceInfo,
+    expandedDatasets,
+    queryClient,
+    setDeletedDataSourceInfo,
+    setDatasetSourcesMap,
+    sessionMap,
+  ]);
+
+  // Force a refresh of all datasets when the component mounts
+  useEffect(() => {
+    // Get all datasets from the session store
+    const datasetIds = new Set<string>();
+
+    // Add datasets from the session store
+    Object.values(sessionMap).forEach((session) => {
+      if (session.selectedDataset?.id) {
+        datasetIds.add(session.selectedDataset.id);
+      }
+    });
+
+    // Refresh each dataset
+    datasetIds.forEach((datasetId) => {
+      handleRefreshDataSources(datasetId);
+    });
+
+    // Also check for any datasets that are currently expanded
+    expandedDatasets.forEach((datasetId) => {
+      if (!datasetIds.has(datasetId)) {
+        handleRefreshDataSources(datasetId);
+      }
+    });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Create a mapping for easy access to query results by datasetId
   const datasourceQueriesMap: Record<
@@ -161,23 +302,70 @@ export function FileTree({ onSelect }: FileTreeProps) {
       newExpandedDatasets.delete(datasetId);
     } else {
       newExpandedDatasets.add(datasetId);
+
+      // When expanding a dataset, always refresh its data sources
+      // This ensures we always have the latest data
+      handleRefreshDataSources(datasetId);
+
+      // Also force a refresh of the dataset in the session store
+      // This ensures we're not showing deleted data sources
+      Object.entries(sessionMap).forEach(([sessionId, session]) => {
+        if (session.selectedDataset?.id === datasetId) {
+          // Force a refresh by setting the dataset again
+          // This will trigger a re-render with the latest data
+          const updatedDataset = { ...session.selectedDataset };
+          useSessionStore.getState().setDataset(sessionId, updatedDataset);
+        }
+      });
     }
 
     setExpandedDatasets(newExpandedDatasets);
   };
 
+  // Handle refresh data sources
+  const handleRefreshDataSources = async (
+    datasetId: string,
+    e?: React.MouseEvent
+  ) => {
+    e?.stopPropagation();
+
+    // Remove from fetched datasets to force refetch
+    fetchedDatasetsRef.current.delete(datasetId);
+
+    // Clear the dataset sources map for this dataset
+    setDatasetSourcesMap((prev) => {
+      const newMap = { ...prev };
+      delete newMap[datasetId];
+      return newMap;
+    });
+
+    // Invalidate query to force refetch
+    await queryClient.invalidateQueries({
+      queryKey: ["datasources", datasetId],
+    });
+
+    // Ensure dataset is expanded
+    if (!expandedDatasets.has(datasetId)) {
+      setExpandedDatasets(new Set([...expandedDatasets, datasetId]));
+    }
+  };
+
   // Check if all data sources in the dataset are selected
   const isDatasetFullySelected = (datasetId: string) => {
     const datasources = datasetSourcesMap[datasetId];
-    if (!datasources || datasources.length === 0) return false;
+    // For empty datasets, consider them selected if the dataset ID matches the selected dataset
+    if (!datasources || !Array.isArray(datasources) || datasources.length === 0)
+      return selectedDataset === datasetId;
 
-    return datasources?.every((ds) => selectedDatasources.has(ds.id));
+    return datasources.every((ds) => selectedDatasources.has(ds.id));
   };
 
   // Check if the dataset is partially selected (some data sources are selected)
   const isDatasetPartiallySelected = (datasetId: string) => {
     const datasources = datasetSourcesMap[datasetId];
-    if (!datasources || datasources.length === 0) return false;
+    // Empty datasets can't be partially selected
+    if (!datasources || !Array.isArray(datasources) || datasources.length === 0)
+      return false;
 
     const hasSelected = datasources.some((ds) =>
       selectedDatasources.has(ds.id)
@@ -190,7 +378,14 @@ export function FileTree({ onSelect }: FileTreeProps) {
     e?.stopPropagation();
 
     // If clicking on the currently fully selected dataset, clear all selections
-    if (selectedDataset === datasetId && isDatasetFullySelected(datasetId)) {
+    // For empty datasets, we need to check if the dataset is already selected
+    if (
+      selectedDataset === datasetId &&
+      (isDatasetFullySelected(datasetId) ||
+        !datasetSourcesMap[datasetId] ||
+        !Array.isArray(datasetSourcesMap[datasetId]) ||
+        datasetSourcesMap[datasetId].length === 0)
+    ) {
       setSelectedDataset(null);
       setSelectedDatasources(new Set());
       onSelect(null);
@@ -206,7 +401,7 @@ export function FileTree({ onSelect }: FileTreeProps) {
     // Set new selected dataset
     setSelectedDataset(datasetId);
 
-    if (datasources && datasources.length > 0) {
+    if (datasources && Array.isArray(datasources) && datasources.length > 0) {
       // Select all data sources under this dataset
       const newSelectedDatasources = new Set(datasources.map((ds) => ds.id));
       setSelectedDatasources(newSelectedDatasources);
@@ -278,13 +473,19 @@ export function FileTree({ onSelect }: FileTreeProps) {
         : new Set([datasourceId])
     );
 
-    const datasourcesForDataset =
+    let datasourcesForDataset =
       datasetSourcesMap[datasetId] ||
       datasourceQueriesMap[datasetId]?.data ||
       [];
+
+    // Ensure datasourcesForDataset is an array
+    if (!Array.isArray(datasourcesForDataset)) {
+      datasourcesForDataset = [];
+    }
     const selectedDatasourcesData = selectedDatasourcesList
       .map((dsId) => {
-        if (!datasourcesForDataset) return undefined;
+        if (!datasourcesForDataset || !Array.isArray(datasourcesForDataset))
+          return undefined;
         return datasourcesForDataset.find((ds) => ds && ds.id === dsId);
       })
       .filter((ds): ds is DataSourceRecord => ds !== undefined);
@@ -326,7 +527,11 @@ export function FileTree({ onSelect }: FileTreeProps) {
         className="space-y-1"
       >
         {datasetsData?.map((dataset) => (
-          <AccordionItem key={dataset.id} value={dataset.id} className="border-0">
+          <AccordionItem
+            key={dataset.id}
+            value={dataset.id}
+            className="border-0"
+          >
             <div className="flex items-center gap-2 rounded-md px-2">
               {/* Expand/Collapse button */}
               <Button
@@ -364,6 +569,25 @@ export function FileTree({ onSelect }: FileTreeProps) {
                   <FolderIcon className="h-4 w-4 text-blue-500" />
                 )}
                 <span className="truncate">{dataset.name}</span>
+
+                {/* Refresh button */}
+                <div onClick={(e) => e.stopPropagation()} className="ml-1">
+                  <TooltipWrapper title="Refresh data sources">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-primary h-5 w-5"
+                      onClick={(e) => handleRefreshDataSources(dataset.id, e)}
+                    >
+                      {isFetchingDataSources ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <RefreshCw className="h-3 w-3" />
+                      )}
+                      <span className="sr-only">Refresh</span>
+                    </Button>
+                  </TooltipWrapper>
+                </div>
               </div>
 
               {/* Delete dataset button */}
@@ -372,13 +596,30 @@ export function FileTree({ onSelect }: FileTreeProps) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                    className="text-muted-foreground hover:text-destructive h-6 w-6"
                     onClick={(e) => {
                       e.stopPropagation();
                       setDatasetToDelete(dataset.id);
                     }}
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-3.5 w-3.5"
+                    >
+                      <path d="M3 6h18"></path>
+                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                      <line x1="10" x2="10" y1="11" y2="17"></line>
+                      <line x1="14" x2="14" y1="11" y2="17"></line>
+                    </svg>
                     <span className="sr-only">Delete</span>
                   </Button>
                 </TooltipWrapper>
@@ -392,14 +633,73 @@ export function FileTree({ onSelect }: FileTreeProps) {
                     <Skeleton key={i} className="my-1 h-6 w-full" />
                   ))}
                 </div>
-              ) : datasourceQueriesMap[dataset.id]?.error ? (
-                <div className="px-2 py-2 text-sm text-red-500">
-                  Failed to load data sources
-                </div>
-              ) : datasourceQueriesMap[dataset.id]?.data &&
-                (datasourceQueriesMap[dataset.id]?.data?.length || 0) > 0 ? (
+              ) : (datasetSourcesMap[dataset.id] &&
+                  Array.isArray(datasetSourcesMap[dataset.id]) &&
+                  datasetSourcesMap[dataset.id].length > 0) ||
+                (datasourceQueriesMap[dataset.id]?.data &&
+                  datasourceQueriesMap[dataset.id]?.data?.length > 0) ||
+                // Check if there are temporary data sources in the session store
+                // Only consider data sources that are in the "creating" or "synching" state
+                // AND only if the dataset is expanded (to ensure we've checked the backend)
+                (expandedDatasets.has(dataset.id) &&
+                  Object.values(sessionMap).some(
+                    (session) =>
+                      session.selectedDataset?.id === dataset.id &&
+                      Array.isArray(session.selectedDataset.datasource) &&
+                      session.selectedDataset.datasource.filter(
+                        (ds) =>
+                          ds.status === "creating" || ds.status === "synching"
+                      ).length > 0
+                  )) ? (
                 <div className="space-y-2 py-2 pl-14">
-                  {datasourceQueriesMap[dataset.id]?.data?.map((datasource) => {
+                  {(() => {
+                    // First check if there are data sources in the datasetSourcesMap
+                    // These are the most reliable as they come directly from the backend
+                    if (
+                      datasetSourcesMap[dataset.id] &&
+                      Array.isArray(datasetSourcesMap[dataset.id]) &&
+                      datasetSourcesMap[dataset.id].length > 0
+                    ) {
+                      return datasetSourcesMap[dataset.id];
+                    }
+
+                    // Then check if there are data sources in the datasourceQueriesMap
+                    if (
+                      datasourceQueriesMap[dataset.id]?.data &&
+                      datasourceQueriesMap[dataset.id]?.data?.length > 0
+                    ) {
+                      return datasourceQueriesMap[dataset.id]?.data || [];
+                    }
+
+                    // Finally check if there are temporary data sources in the session store
+                    // Only show these if they're in the "creating" or "synching" state
+                    // This prevents showing deleted data sources that might still be in the session store
+                    const sessionWithDataset = Object.values(sessionMap).find(
+                      (session) =>
+                        session.selectedDataset?.id === dataset.id &&
+                        Array.isArray(session.selectedDataset.datasource) &&
+                        session.selectedDataset.datasource.length > 0
+                    );
+
+                    if (
+                      sessionWithDataset &&
+                      sessionWithDataset.selectedDataset
+                    ) {
+                      // Only show data sources that are in the "creating" or "synching" state
+                      // This prevents showing deleted data sources
+                      const tempDataSources =
+                        sessionWithDataset.selectedDataset.datasource.filter(
+                          (ds) =>
+                            ds.status === "creating" || ds.status === "synching"
+                        );
+
+                      if (tempDataSources.length > 0) {
+                        return tempDataSources;
+                      }
+                    }
+
+                    return [];
+                  })().map((datasource) => {
                     return (
                       <div
                         key={datasource.id}
@@ -423,28 +723,6 @@ export function FileTree({ onSelect }: FileTreeProps) {
                         <span className="text-primary/70 truncate text-sm font-medium">
                           {datasource.name}
                         </span>
-
-                        {/* Delete data source button */}
-                        <div className="ml-auto" onClick={(e) => e.stopPropagation()}>
-                          <TooltipWrapper title="Delete data source">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-5 w-5 text-muted-foreground hover:text-destructive"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setDatasourceToDelete({
-                                  id: datasource.id,
-                                  datasetId: dataset.id,
-                                  name: datasource.name,
-                                });
-                              }}
-                            >
-                              <Trash2 className="h-3 w-3" />
-                              <span className="sr-only">Delete</span>
-                            </Button>
-                          </TooltipWrapper>
-                        </div>
                       </div>
                     );
                   })}
@@ -474,8 +752,8 @@ export function FileTree({ onSelect }: FileTreeProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Dataset</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this dataset? This action cannot be undone.
-              All data sources in this dataset will also be deleted.
+              Are you sure you want to delete this dataset? This action cannot
+              be undone. All data sources in this dataset will also be deleted.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -515,109 +793,24 @@ export function FileTree({ onSelect }: FileTreeProps) {
                   }
 
                   // Invalidate queries
-                  await queryClient.invalidateQueries({ queryKey: ["datasets"] });
+                  await queryClient.invalidateQueries({
+                    queryKey: ["datasets"],
+                  });
+
+                  // Emit dataset deletion event
+                  setDeletedDatasetId(datasetToDelete);
 
                   appToast.success("Dataset deleted", {
                     description: "Dataset has been deleted successfully.",
                   });
-                } catch (error) {
+                } catch (_error) {
                   appToast.error("Failed to delete dataset", {
-                    description: "There was an error deleting the dataset. Please try again.",
+                    description:
+                      "There was an error deleting the dataset. Please try again.",
                   });
                 } finally {
                   setIsDeleting(false);
                   setDatasetToDelete(null);
-                }
-              }}
-              disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {isDeleting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                "Delete"
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Delete data source confirmation dialog */}
-      <AlertDialog
-        open={datasourceToDelete !== null}
-        onOpenChange={(open) => !open && setDatasourceToDelete(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Data Source</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete the data source "{datasourceToDelete?.name}"?
-              This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={async () => {
-                if (!datasourceToDelete) return;
-
-                try {
-                  setIsDeleting(true);
-                  await deleteDataSource(datasourceToDelete.datasetId, datasourceToDelete.id);
-
-                  // Remove from selected datasources if it was selected
-                  if (selectedDatasources.has(datasourceToDelete.id)) {
-                    const newSelectedDatasources = new Set(selectedDatasources);
-                    newSelectedDatasources.delete(datasourceToDelete.id);
-                    setSelectedDatasources(newSelectedDatasources);
-
-                    // Update selected dataset if needed
-                    if (newSelectedDatasources.size === 0) {
-                      setSelectedDataset(null);
-                      onSelect(null);
-                    } else {
-                      // Update the selected dataset with the remaining data sources
-                      const dataset = datasetsData?.find(d => d.id === datasourceToDelete.datasetId);
-                      if (dataset) {
-                        const remainingDatasources = datasetSourcesMap[datasourceToDelete.datasetId]?.filter(
-                          ds => newSelectedDatasources.has(ds.id)
-                        ) || [];
-
-                        onSelect({
-                          ...dataset,
-                          datasource: remainingDatasources,
-                        });
-                      }
-                    }
-                  }
-
-                  // Update dataset sources map
-                  if (datasetSourcesMap[datasourceToDelete.datasetId]) {
-                    const newMap = { ...datasetSourcesMap };
-                    newMap[datasourceToDelete.datasetId] = newMap[datasourceToDelete.datasetId].filter(
-                      ds => ds.id !== datasourceToDelete.id
-                    );
-                    setDatasetSourcesMap(newMap);
-                  }
-
-                  // Invalidate queries
-                  await queryClient.invalidateQueries({
-                    queryKey: ["datasources", datasourceToDelete.datasetId]
-                  });
-
-                  appToast.success("Data source deleted", {
-                    description: `Data source "${datasourceToDelete.name}" has been deleted successfully.`,
-                  });
-                } catch (error) {
-                  appToast.error("Failed to delete data source", {
-                    description: "There was an error deleting the data source. Please try again.",
-                  });
-                } finally {
-                  setIsDeleting(false);
-                  setDatasourceToDelete(null);
                 }
               }}
               disabled={isDeleting}
