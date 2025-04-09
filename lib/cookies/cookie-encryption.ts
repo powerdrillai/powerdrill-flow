@@ -1,8 +1,9 @@
 import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
 
 // 使用环境变量存储加密密钥，如果未设置则生成一个固定的密钥
+// For AES-256-GCM, we need a 32-byte key (64 hex characters)
 const ENCRYPTION_KEY =
-  process.env.COOKIE_ENCRYPTION_KEY || "d4c74594d841139328695756648b6bd6";
+  process.env.COOKIE_ENCRYPTION_KEY || "d4c74594d841139328695756648b6bd6d4c74594d841139328695756648b6bd6";
 const ALGORITHM = "aes-256-gcm";
 
 // 加密数据

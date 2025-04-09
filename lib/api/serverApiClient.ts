@@ -75,13 +75,28 @@ export async function serverFetchData<T>(endpoint: string): Promise<T> {
     const headers = await getApiHeaders();
     const url = new URL(`${API_BASE_URL}${endpoint}`);
     url.searchParams.set("user_id", credentials.userId);
+
+    console.log(`Making API request to: ${url.toString()}`);
+    console.log(`With headers: ${JSON.stringify(headers, null, 2)}`);
+
     const response = await fetch(url.toString(), {
       method: "GET",
       headers,
     });
 
+    if (!response.ok) {
+      console.error(`API request failed with status: ${response.status}`);
+      try {
+        const errorText = await response.text();
+        console.error(`Error response: ${errorText}`);
+      } catch (e) {
+        console.error('Could not read error response body');
+      }
+    }
+
     return await handleApiResponse<T>(response);
   } catch (error) {
+    console.error('Error in serverFetchData:', error);
     throw handleError(error);
   }
 }
@@ -135,16 +150,22 @@ export async function serverDeleteData<T>(
 function handleError(error: unknown): PowerdrillApiError {
   const apiError = createApiError(error);
 
-  if (apiError.httpStatus === 401) {
+  if (apiError.httpStatus === 401 || apiError.httpStatus === 403) {
     // Authentication error handling
     console.error(
-      "Authentication failed, please check your User ID and API Key"
+      `Authentication failed (${apiError.httpStatus}), please check your User ID and API Key. Error: ${apiError.getFormattedMessage()}`
     );
+    if (apiError.details) {
+      console.error('Error details:', apiError.details);
+    }
   } else if (apiError.httpStatus === 429) {
     // Rate limit exceeded
     console.error("Too many requests, please try again later");
   } else {
     console.error("API request error:", apiError.getFormattedMessage());
+    if (apiError.details) {
+      console.error('Error details:', apiError.details);
+    }
   }
 
   return apiError;

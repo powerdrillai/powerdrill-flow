@@ -31,20 +31,34 @@ export async function submitApiCredentials(formData: FormData) {
     // Save credentials to cookie
     await setCookieApiCredentials(userId, apiKey);
 
+    console.log('Credentials saved to cookies, attempting to validate with API call...');
+
     // Try an API call to validate credentials
     await serverFetchData("/sessions");
 
+    console.log('API validation successful');
     return {
       success: true,
       message: "API credentials saved",
     };
-  } catch (_error) {
+  } catch (error) {
     // Credentials validation failed, clear the cookie
+    console.error('API validation failed:', error);
     await clearApiCredentials();
+
+    let errorMessage = "Failed to set API credentials, please check your input";
+
+    // If it's a PowerdrillApiError, get more specific error message
+    if (error instanceof PowerdrillApiError) {
+      errorMessage = `API validation failed: ${error.getFormattedMessage()}`;
+      console.error('API Error details:', error);
+    } else if (error instanceof Error) {
+      errorMessage = `Error: ${error.message}`;
+    }
 
     return {
       success: false,
-      message: "Failed to set API credentials, please check your input",
+      message: errorMessage,
     };
   }
 }
